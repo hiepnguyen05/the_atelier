@@ -1,22 +1,14 @@
-require("dotenv").config();
-const Express = require("express");
-const app = Express();
-const db = require("./src/config/db");
-const routes = require("./src/routes");
-
-app.use(Express.json());
+const app = require("./src/app");
+const { sequelize } = require("./src/config/db");
 
 // Kết nối database
-db.authenticate()
+sequelize.authenticate()
   .then(() => {
     console.log("Connection to the database has been established successfully.");
   })
   .catch((err) => {
     console.error("Unable to connect to the database:", err);
   });
-
-// Sử dụng các routes
-app.use("/api", routes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

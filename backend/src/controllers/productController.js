@@ -1,39 +1,44 @@
-const db = require("../config/db");
+const productService = require("../services/productService");
+const asyncHandler = require("../utils/asyncHandler");
 
-// api tạo sản phẩm mới
-const createProduct = async (req, res) => {
-  const {
-    sku_base,
-    name,
-    slug,
-    category_id,
-    collection_id,
-    base_price,
-    description,
-    material,
-    care_instructions,
-  } = req.body;
-  try {
-    const [result, created] = await db.models.products.findOrCreate({
-      where: { sku_base },
-      defaults: {
-        name,
-        slug,
-        category_id,
-        collection_id,
-        base_price,
-        description,
-        material,
-        care_instructions,
-      },
-    });
-    res.status(201).json(result);
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ error: "Internal server error" });
+const getProducts = asyncHandler(async (req, res) => {
+  const result = await productService.getProducts(req.query);
+  res.json(result);
+});
+
+const getProductBySlug = asyncHandler(async (req, res) => {
+  const product = await productService.getProductBySlug(req.params.slug);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
   }
-};
+  res.json(product);
+});
+
+const createProduct = asyncHandler(async (req, res) => {
+  const product = await productService.createProduct(req.body);
+  res.status(201).json(product);
+});
+
+const updateProduct = asyncHandler(async (req, res) => {
+  const product = await productService.updateProduct(req.params.id, req.body);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  res.json(product);
+});
+
+const deleteProduct = asyncHandler(async (req, res) => {
+  const success = await productService.deleteProduct(req.params.id);
+  if (!success) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  res.json({ message: "Product deleted (inactivated) successfully" });
+});
 
 module.exports = {
+  getProducts,
+  getProductBySlug,
   createProduct,
+  updateProduct,
+  deleteProduct,
 };

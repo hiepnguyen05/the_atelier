@@ -4,23 +4,32 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --watchAll",
     "start": "nodemon index.js",
     "dev": "nodemon index.js"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "joi": "^18.2.1",
     "mysql2": "^3.22.3",
-    "sequelize": "^6.37.8"
+    "sequelize": "^6.37.8",
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14",
-    "sequelize-auto": "^0.8.8"
+    "sequelize-auto": "^0.8.8",
+    "supertest": "^7.2.2"
   }
 }

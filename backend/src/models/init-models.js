@@ -43,7 +43,7 @@ function initModels(sequelize) {
   cart_items.belongsTo(cart, { as: "cart", foreignKey: "cart_id"});
   cart.hasMany(cart_items, { as: "cart_items", foreignKey: "cart_id"});
   categories.belongsTo(categories, { as: "parent", foreignKey: "parent_id"});
-  categories.hasMany(categories, { as: "categories", foreignKey: "parent_id"});
+  categories.hasMany(categories, { as: "sub_categories", foreignKey: "parent_id"});
   products.belongsTo(categories, { as: "category", foreignKey: "category_id"});
   categories.hasMany(products, { as: "products", foreignKey: "category_id"});
   products.belongsTo(collections, { as: "collection", foreignKey: "collection_id"});
