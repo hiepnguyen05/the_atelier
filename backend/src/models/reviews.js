@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('reviews', {
-    review_id: {
+    reviewId: {
+      field: 'review_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    product_id: {
+    productId: {
+      field: 'product_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,7 +17,8 @@ module.exports = function(sequelize, DataTypes) {
         key: 'product_id'
       }
     },
-    user_id: {
+    userId: {
+      field: 'user_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -30,16 +33,12 @@ module.exports = function(sequelize, DataTypes) {
     comment: {
       type: DataTypes.STRING(1000),
       allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'reviews',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

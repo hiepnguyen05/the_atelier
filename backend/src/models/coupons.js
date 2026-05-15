@@ -1,7 +1,8 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('coupons', {
-    coupon_id: {
+    couponId: {
+      field: 'coupon_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -12,28 +13,34 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       unique: "code"
     },
-    discount_percent: {
+    discountPercent: {
+      field: 'discount_percent',
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    discount_amount: {
+    discountAmount: {
+      field: 'discount_amount',
       type: DataTypes.DECIMAL(19,2),
       allowNull: true
     },
-    min_order_value: {
+    minOrderValue: {
+      field: 'min_order_value',
       type: DataTypes.DECIMAL(19,2),
       allowNull: true
     },
-    expiry_date: {
+    expiryDate: {
+      field: 'expiry_date',
       type: DataTypes.DATE,
       allowNull: true
     },
-    usage_limit: {
+    usageLimit: {
+      field: 'usage_limit',
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 1
     },
-    is_active: {
+    isActive: {
+      field: 'is_active',
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 1
@@ -41,7 +48,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'coupons',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('users', {
-    user_id: {
+    userId: {
+      field: 'user_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    full_name: {
+    fullName: {
+      field: 'full_name',
       type: DataTypes.STRING(255),
       allowNull: false
     },
@@ -16,7 +18,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       unique: "email"
     },
-    password_hash: {
+    passwordHash: {
+      field: 'password_hash',
       type: DataTypes.STRING(255),
       allowNull: false
     },
@@ -24,11 +27,13 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(20),
       allowNull: true
     },
-    avatar_url: {
+    avatarUrl: {
+      field: 'avatar_url',
       type: DataTypes.STRING(255),
       allowNull: true
     },
-    role_id: {
+    roleId: {
+      field: 'role_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -36,20 +41,17 @@ module.exports = function(sequelize, DataTypes) {
         key: 'role_id'
       }
     },
-    is_active: {
+    isActive: {
+      field: 'is_active',
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 1
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'users',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('product_variants', {
-    variant_id: {
+    variantId: {
+      field: 'variant_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    product_id: {
+    productId: {
+      field: 'product_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,29 +17,35 @@ module.exports = function(sequelize, DataTypes) {
         key: 'product_id'
       }
     },
-    sku_variant: {
+    skuVariant: {
+      field: 'sku_variant',
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: "sku_variant"
     },
-    color_name: {
+    colorName: {
+      field: 'color_name',
       type: DataTypes.STRING(100),
       allowNull: true
     },
-    color_code: {
+    colorCode: {
+      field: 'color_code',
       type: DataTypes.STRING(7),
       allowNull: true
     },
-    size_name: {
+    sizeName: {
+      field: 'size_name',
       type: DataTypes.STRING(20),
       allowNull: true
     },
-    stock_quantity: {
+    stockQuantity: {
+      field: 'stock_quantity',
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0
     },
-    price_adjustment: {
+    priceAdjustment: {
+      field: 'price_adjustment',
       type: DataTypes.DECIMAL(19,2),
       allowNull: true,
       defaultValue: 0.00
@@ -45,7 +53,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'product_variants',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

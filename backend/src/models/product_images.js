@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('product_images', {
-    image_id: {
+    imageId: {
+      field: 'image_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    product_id: {
+    productId: {
+      field: 'product_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,11 +17,13 @@ module.exports = function(sequelize, DataTypes) {
         key: 'product_id'
       }
     },
-    image_url: {
+    imageUrl: {
+      field: 'image_url',
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    is_primary: {
+    isPrimary: {
+      field: 'is_primary',
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 0
@@ -27,7 +31,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'product_images',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

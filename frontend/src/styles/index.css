@@ -1,4 +1,18 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+
+
+body { font-family: 'Manrope', sans-serif; background-color: #fcf9f8; color: #323233; margin: 0; }
+.font-serif { font-family: 'Newsreader', serif; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f0eded; }
+::-webkit-scrollbar-thumb { background: #b2b2b1; }
+
 
 :root {
   /* Color Palette - Exactly from Sample */

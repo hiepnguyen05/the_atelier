@@ -1,14 +1,14 @@
 const { models, sequelize } = require("../config/db");
 const { Op } = require("sequelize");
-const { generateSlug } = require("../utils/slugifyUtils");
+const { generateSlug, generateSKU } = require("../utils/slugifyUtils");
 
 const getProducts = async (query) => {
-  const { page = 1, limit = 10, category_id, collection_id, search } = query;
+  const { page = 1, limit = 10, categoryId, collectionId, search } = query;
   const offset = (page - 1) * limit;
 
   const whereClause = { status: "active" };
-  if (category_id) whereClause.category_id = category_id;
-  if (collection_id) whereClause.collection_id = collection_id;
+  if (categoryId) whereClause.categoryId = categoryId;
+  if (collectionId) whereClause.collectionId = collectionId;
   if (search) {
     whereClause.name = { [Op.like]: `%${search}%` };
   }
@@ -18,9 +18,9 @@ const getProducts = async (query) => {
     limit: parseInt(limit),
     offset: parseInt(offset),
     include: [
-      { model: models.product_images, as: "product_images", limit: 1 },
+      { model: models.product_images, as: "productImages", limit: 1 },
     ],
-    order: [["product_id", "DESC"]],
+    order: [["productId", "DESC"]],
   });
 
   return {
@@ -35,8 +35,8 @@ const getProductBySlug = async (slug) => {
   const product = await models.products.findOne({
     where: { slug, status: "active" },
     include: [
-      { model: models.product_images, as: "product_images" },
-      { model: models.product_variants, as: "product_variants" },
+      { model: models.product_images, as: "productImages" },
+      { model: models.product_variants, as: "productVariants" },
       { model: models.categories, as: "category" },
       { model: models.collections, as: "collection" },
     ],
@@ -50,9 +50,39 @@ const getProductBySlug = async (slug) => {
 const createProduct = async (productData) => {
   const { images, variants, ...mainData } = productData;
 
+  // Tự động tạo SKU nếu chưa có
+  if (!mainData.skuBase || mainData.skuBase.trim() === "") {
+    let categoryName = "GEN";
+    if (mainData.categoryId) {
+      const cat = await models.categories.findByPk(mainData.categoryId);
+      if (cat) categoryName = cat.name;
+    }
+    mainData.skuBase = generateSKU(categoryName);
+  }
+
   // Tự động tạo slug
   if (!mainData.slug || mainData.slug.trim() === "") {
-    mainData.slug = generateSlug(mainData.name, mainData.sku_base);
+    mainData.slug = generateSlug(mainData.name, mainData.skuBase);
+  }
+
+  // Kiểm tra trùng Slug hoặc SKU trong các bản ghi đã xóa mềm
+  const conflictingProduct = await models.products.findOne({
+    where: {
+      [Op.or]: [
+        { slug: mainData.slug },
+        { skuBase: mainData.skuBase }
+      ]
+    },
+    paranoid: false
+  });
+
+  if (conflictingProduct) {
+    if (!conflictingProduct.deletedAt) {
+      throw new Error("Sản phẩm với Slug hoặc SKU này đã tồn tại và đang hoạt động");
+    } else {
+      // Xóa vĩnh viễn bản ghi cũ đã bị xóa mềm để tạo mới
+      await conflictingProduct.destroy({ force: true });
+    }
   }
 
   const transaction = await sequelize.transaction();
@@ -65,7 +95,7 @@ const createProduct = async (productData) => {
     if (images && images.length > 0) {
       const imageData = images.map(img => ({
         ...img,
-        product_id: product.product_id
+        productId: product.productId
       }));
       await models.product_images.bulkCreate(imageData, { transaction });
     }
@@ -74,7 +104,7 @@ const createProduct = async (productData) => {
     if (variants && variants.length > 0) {
       const variantData = variants.map(v => ({
         ...v,
-        product_id: product.product_id
+        productId: product.productId
       }));
       await models.product_variants.bulkCreate(variantData, { transaction });
     }
@@ -97,7 +127,7 @@ const updateProduct = async (id, productData) => {
   const { images, variants, ...mainData } = productData;
 
   if (mainData.name && (!mainData.slug || mainData.slug.trim() === "")) {
-    mainData.slug = generateSlug(mainData.name, mainData.sku_base || product.sku_base);
+    mainData.slug = generateSlug(mainData.name, mainData.skuBase || product.skuBase);
   }
 
   const transaction = await sequelize.transaction();
@@ -108,15 +138,15 @@ const updateProduct = async (id, productData) => {
 
     // 2. Cập nhật ảnh (Xóa cũ thêm mới - Cách đơn giản nhất)
     if (images) {
-      await models.product_images.destroy({ where: { product_id: id }, transaction });
-      const imageData = images.map(img => ({ ...img, product_id: id }));
+      await models.product_images.destroy({ where: { productId: id }, transaction });
+      const imageData = images.map(img => ({ ...img, productId: id }));
       await models.product_images.bulkCreate(imageData, { transaction });
     }
 
     // 3. Cập nhật biến thể (Xóa cũ thêm mới)
     if (variants) {
-      await models.product_variants.destroy({ where: { product_id: id }, transaction });
-      const variantData = variants.map(v => ({ ...v, product_id: id }));
+      await models.product_variants.destroy({ where: { productId: id }, transaction });
+      const variantData = variants.map(v => ({ ...v, productId: id }));
       await models.product_variants.bulkCreate(variantData, { transaction });
     }
 
@@ -133,7 +163,14 @@ const deleteProduct = async (id) => {
   const product = await models.products.findByPk(id);
   if (!product) return false;
   
-  await product.update({ status: "inactive" });
+  // Giải phóng slug và skuBase để có thể dùng lại cho sản phẩm mới
+  await product.update({ 
+    slug: `${product.slug}-deleted-${Date.now()}`,
+    skuBase: `${product.skuBase}-deleted-${Date.now()}`
+  });
+
+  // Use soft delete (paranoid: true)
+  await product.destroy(); 
   return true;
 };
 

@@ -16,6 +16,11 @@ const sequelize = new Sequelize(
       },
     },
     logging: false, // Tắt log SQL để console sạch hơn
+    define: {
+      underscored: true, // Map camelCase properties to snake_case columns
+      timestamps: true,  // Automatically add createdAt and updatedAt
+      paranoid: true,    // Enable soft deletes (deletedAt)
+    },
   },
 );
 

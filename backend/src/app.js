@@ -1,10 +1,13 @@
 require("dotenv").config();
 const Express = require("express");
+const cors = require("cors");
 const app = Express();
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorMiddleware");
 
-app.use(Express.json());
+app.use(cors());
+app.use(Express.json({ limit: '10mb' }));
+app.use(Express.urlencoded({ limit: '10mb', extended: true }));
 
 // Sử dụng các routes
 app.use("/api", routes);

@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('categories', {
-    category_id: {
+    categoryId: {
+      field: 'category_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    parent_id: {
+    parentId: {
+      field: 'parent_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -31,7 +33,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'categories',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

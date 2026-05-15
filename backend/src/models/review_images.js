@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('review_images', {
-    image_id: {
+    imageId: {
+      field: 'image_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    review_id: {
+    reviewId: {
+      field: 'review_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,14 +17,16 @@ module.exports = function(sequelize, DataTypes) {
         key: 'review_id'
       }
     },
-    image_url: {
+    imageUrl: {
+      field: 'image_url',
       type: DataTypes.STRING(255),
       allowNull: false
     }
   }, {
     sequelize,
     tableName: 'review_images',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

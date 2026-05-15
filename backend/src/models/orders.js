@@ -1,18 +1,21 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('orders', {
-    order_id: {
+    orderId: {
+      field: 'order_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    order_code: {
+    orderCode: {
+      field: 'order_code',
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: "order_code"
     },
-    user_id: {
+    userId: {
+      field: 'user_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -20,7 +23,8 @@ module.exports = function(sequelize, DataTypes) {
         key: 'user_id'
       }
     },
-    coupon_id: {
+    couponId: {
+      field: 'coupon_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -28,20 +32,24 @@ module.exports = function(sequelize, DataTypes) {
         key: 'coupon_id'
       }
     },
-    total_amount: {
+    totalAmount: {
+      field: 'total_amount',
       type: DataTypes.DECIMAL(19,2),
       allowNull: false
     },
-    shipping_fee: {
+    shippingFee: {
+      field: 'shipping_fee',
       type: DataTypes.DECIMAL(19,2),
       allowNull: true,
       defaultValue: 0.00
     },
-    final_amount: {
+    finalAmount: {
+      field: 'final_amount',
       type: DataTypes.DECIMAL(19,2),
       allowNull: false
     },
-    shipping_address_id: {
+    shippingAddressId: {
+      field: 'shipping_address_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -53,16 +61,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.ENUM('pending','processing','shipped','completed','cancelled'),
       allowNull: true,
       defaultValue: "pending"
-    },
-    order_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'orders',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

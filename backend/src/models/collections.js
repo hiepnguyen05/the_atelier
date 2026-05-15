@@ -1,7 +1,8 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('collections', {
-    collection_id: {
+    collectionId: {
+      field: 'collection_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -16,28 +17,60 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       unique: "slug"
     },
+    tagline: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    cover_image_url: {
+    season: {
+      type: DataTypes.ENUM('Spring/Summer', 'Fall/Winter', 'Resort', 'Pre-Fall', 'Special Edition'),
+      allowNull: true
+    },
+    year: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    heroImageUrl: {
+      field: 'hero_image_url',
       type: DataTypes.STRING(255),
       allowNull: true
     },
-    is_active: {
+    coverImageUrl: {
+      field: 'cover_image_url',
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    footerImageUrl: {
+      field: 'footer_image_url',
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    editorialContent: {
+      field: 'editorial_content',
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: 'Stores the sequence of story blocks (text, image, products)'
+    },
+    isFeatured: {
+      field: 'is_featured',
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: 0
+    },
+    isActive: {
+      field: 'is_active',
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 1
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'collections',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

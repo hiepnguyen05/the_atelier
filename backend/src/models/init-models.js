@@ -1,5 +1,6 @@
 var DataTypes = require("sequelize").DataTypes;
 var _addresses = require("./addresses");
+var _brands = require("./brands");
 var _blog_posts = require("./blog_posts");
 var _cart = require("./cart");
 var _cart_items = require("./cart_items");
@@ -20,6 +21,7 @@ var _wishlists = require("./wishlists");
 
 function initModels(sequelize) {
   var addresses = _addresses(sequelize, DataTypes);
+  var brands = _brands(sequelize, DataTypes);
   var blog_posts = _blog_posts(sequelize, DataTypes);
   var cart = _cart(sequelize, DataTypes);
   var cart_items = _cart_items(sequelize, DataTypes);
@@ -38,53 +40,56 @@ function initModels(sequelize) {
   var users = _users(sequelize, DataTypes);
   var wishlists = _wishlists(sequelize, DataTypes);
 
-  orders.belongsTo(addresses, { as: "shipping_address", foreignKey: "shipping_address_id"});
-  addresses.hasMany(orders, { as: "orders", foreignKey: "shipping_address_id"});
-  cart_items.belongsTo(cart, { as: "cart", foreignKey: "cart_id"});
-  cart.hasMany(cart_items, { as: "cart_items", foreignKey: "cart_id"});
-  categories.belongsTo(categories, { as: "parent", foreignKey: "parent_id"});
-  categories.hasMany(categories, { as: "sub_categories", foreignKey: "parent_id"});
-  products.belongsTo(categories, { as: "category", foreignKey: "category_id"});
-  categories.hasMany(products, { as: "products", foreignKey: "category_id"});
-  products.belongsTo(collections, { as: "collection", foreignKey: "collection_id"});
-  collections.hasMany(products, { as: "products", foreignKey: "collection_id"});
-  orders.belongsTo(coupons, { as: "coupon", foreignKey: "coupon_id"});
-  coupons.hasMany(orders, { as: "orders", foreignKey: "coupon_id"});
-  order_items.belongsTo(orders, { as: "order", foreignKey: "order_id"});
-  orders.hasMany(order_items, { as: "order_items", foreignKey: "order_id"});
-  payments.belongsTo(orders, { as: "order", foreignKey: "order_id"});
-  orders.hasOne(payments, { as: "payment", foreignKey: "order_id"});
-  cart_items.belongsTo(product_variants, { as: "variant", foreignKey: "variant_id"});
-  product_variants.hasMany(cart_items, { as: "cart_items", foreignKey: "variant_id"});
-  order_items.belongsTo(product_variants, { as: "variant", foreignKey: "variant_id"});
-  product_variants.hasMany(order_items, { as: "order_items", foreignKey: "variant_id"});
-  product_images.belongsTo(products, { as: "product", foreignKey: "product_id"});
-  products.hasMany(product_images, { as: "product_images", foreignKey: "product_id"});
-  product_variants.belongsTo(products, { as: "product", foreignKey: "product_id"});
-  products.hasMany(product_variants, { as: "product_variants", foreignKey: "product_id"});
-  reviews.belongsTo(products, { as: "product", foreignKey: "product_id"});
-  products.hasMany(reviews, { as: "reviews", foreignKey: "product_id"});
-  wishlists.belongsTo(products, { as: "product", foreignKey: "product_id"});
-  products.hasMany(wishlists, { as: "wishlists", foreignKey: "product_id"});
-  review_images.belongsTo(reviews, { as: "review", foreignKey: "review_id"});
-  reviews.hasMany(review_images, { as: "review_images", foreignKey: "review_id"});
-  users.belongsTo(roles, { as: "role", foreignKey: "role_id"});
-  roles.hasMany(users, { as: "users", foreignKey: "role_id"});
-  addresses.belongsTo(users, { as: "user", foreignKey: "user_id"});
-  users.hasMany(addresses, { as: "addresses", foreignKey: "user_id"});
-  blog_posts.belongsTo(users, { as: "author", foreignKey: "author_id"});
-  users.hasMany(blog_posts, { as: "blog_posts", foreignKey: "author_id"});
-  cart.belongsTo(users, { as: "user", foreignKey: "user_id"});
-  users.hasOne(cart, { as: "cart", foreignKey: "user_id"});
-  orders.belongsTo(users, { as: "user", foreignKey: "user_id"});
-  users.hasMany(orders, { as: "orders", foreignKey: "user_id"});
-  reviews.belongsTo(users, { as: "user", foreignKey: "user_id"});
-  users.hasMany(reviews, { as: "reviews", foreignKey: "user_id"});
-  wishlists.belongsTo(users, { as: "user", foreignKey: "user_id"});
-  users.hasMany(wishlists, { as: "wishlists", foreignKey: "user_id"});
+  orders.belongsTo(addresses, { as: "shippingAddress", foreignKey: "shippingAddressId"});
+  addresses.hasMany(orders, { as: "orders", foreignKey: "shippingAddressId"});
+  cart_items.belongsTo(cart, { as: "cart", foreignKey: "cartId"});
+  cart.hasMany(cart_items, { as: "cartItems", foreignKey: "cartId"});
+  categories.belongsTo(categories, { as: "parent", foreignKey: "parentId"});
+  categories.hasMany(categories, { as: "subCategories", foreignKey: "parentId"});
+  products.belongsTo(categories, { as: "category", foreignKey: "categoryId"});
+  categories.hasMany(products, { as: "products", foreignKey: "categoryId"});
+  products.belongsTo(collections, { as: "collection", foreignKey: "collectionId"});
+  collections.hasMany(products, { as: "products", foreignKey: "collectionId"});
+  products.belongsTo(brands, { as: "brand", foreignKey: "brandId"});
+  brands.hasMany(products, { as: "products", foreignKey: "brandId"});
+  orders.belongsTo(coupons, { as: "coupon", foreignKey: "couponId"});
+  coupons.hasMany(orders, { as: "orders", foreignKey: "couponId"});
+  order_items.belongsTo(orders, { as: "order", foreignKey: "orderId"});
+  orders.hasMany(order_items, { as: "orderItems", foreignKey: "orderId"});
+  payments.belongsTo(orders, { as: "order", foreignKey: "orderId"});
+  orders.hasOne(payments, { as: "payment", foreignKey: "orderId"});
+  cart_items.belongsTo(product_variants, { as: "variant", foreignKey: "variantId"});
+  product_variants.hasMany(cart_items, { as: "cartItems", foreignKey: "variantId"});
+  order_items.belongsTo(product_variants, { as: "variant", foreignKey: "variantId"});
+  product_variants.hasMany(order_items, { as: "orderItems", foreignKey: "variantId"});
+  product_images.belongsTo(products, { as: "product", foreignKey: "productId"});
+  products.hasMany(product_images, { as: "productImages", foreignKey: "productId"});
+  product_variants.belongsTo(products, { as: "product", foreignKey: "productId"});
+  products.hasMany(product_variants, { as: "productVariants", foreignKey: "productId"});
+  reviews.belongsTo(products, { as: "product", foreignKey: "productId"});
+  products.hasMany(reviews, { as: "reviews", foreignKey: "productId"});
+  wishlists.belongsTo(products, { as: "product", foreignKey: "productId"});
+  products.hasMany(wishlists, { as: "wishlists", foreignKey: "productId"});
+  review_images.belongsTo(reviews, { as: "review", foreignKey: "reviewId"});
+  reviews.hasMany(review_images, { as: "reviewImages", foreignKey: "reviewId"});
+  users.belongsTo(roles, { as: "role", foreignKey: "roleId"});
+  roles.hasMany(users, { as: "users", foreignKey: "roleId"});
+  addresses.belongsTo(users, { as: "user", foreignKey: "userId"});
+  users.hasMany(addresses, { as: "addresses", foreignKey: "userId"});
+  blog_posts.belongsTo(users, { as: "author", foreignKey: "authorId"});
+  users.hasMany(blog_posts, { as: "blogPosts", foreignKey: "authorId"});
+  cart.belongsTo(users, { as: "user", foreignKey: "userId"});
+  users.hasOne(cart, { as: "cart", foreignKey: "userId"});
+  orders.belongsTo(users, { as: "user", foreignKey: "userId"});
+  users.hasMany(orders, { as: "orders", foreignKey: "userId"});
+  reviews.belongsTo(users, { as: "user", foreignKey: "userId"});
+  users.hasMany(reviews, { as: "reviews", foreignKey: "userId"});
+  wishlists.belongsTo(users, { as: "user", foreignKey: "userId"});
+  users.hasMany(wishlists, { as: "wishlists", foreignKey: "userId"});
 
   return {
     addresses,
+    brands,
     blog_posts,
     cart,
     cart_items,

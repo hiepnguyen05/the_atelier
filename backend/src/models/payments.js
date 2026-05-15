@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('payments', {
-    payment_id: {
+    paymentId: {
+      field: 'payment_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    order_id: {
+    orderId: {
+      field: 'order_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -16,11 +18,13 @@ module.exports = function(sequelize, DataTypes) {
       },
       unique: "order_id"
     },
-    payment_method: {
+    paymentMethod: {
+      field: 'payment_method',
       type: DataTypes.ENUM('credit_card','bank_transfer','cod','e_wallet'),
       allowNull: false
     },
-    transaction_id: {
+    transactionId: {
+      field: 'transaction_id',
       type: DataTypes.STRING(100),
       allowNull: true
     },
@@ -33,15 +37,16 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       defaultValue: "pending"
     },
-    payment_date: {
+    paymentDate: {
+      field: 'payment_date',
       type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'payments',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

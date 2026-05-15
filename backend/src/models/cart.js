@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('cart', {
-    cart_id: {
+    cartId: {
+      field: 'cart_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
+    userId: {
+      field: 'user_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,16 +17,12 @@ module.exports = function(sequelize, DataTypes) {
         key: 'user_id'
       },
       unique: "user_id"
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'cart',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

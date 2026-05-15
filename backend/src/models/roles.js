@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('roles', {
-    role_id: {
+    roleId: {
+      field: 'role_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    role_name: {
+    roleName: {
+      field: 'role_name',
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: "role_name"
@@ -15,7 +17,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'roles',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

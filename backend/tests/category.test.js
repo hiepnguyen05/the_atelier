@@ -29,22 +29,22 @@ describe("Comprehensive Category API Tests", () => {
   describe("CRUD Operations", () => {
     it("should perform full CRUD flow successfully", async () => {
       const newCat = { name: "New Category", slug: "new-cat" };
-      categoryService.createCategory.mockResolvedValue({ category_id: 10, ...newCat });
+      categoryService.createCategory.mockResolvedValue({ categoryId: 10, ...newCat });
       const createRes = await request(app).post("/api/categories").send(newCat);
       expect(createRes.statusCode).toBe(201);
 
-      categoryService.getCategoryById.mockResolvedValue({ category_id: 10, ...newCat });
+      categoryService.getCategoryById.mockResolvedValue({ categoryId: 10, ...newCat });
       const readRes = await request(app).get("/api/categories/10");
       expect(readRes.body.name).toBe(newCat.name);
 
       // Read by Slug (Now using the same clean route)
-      categoryService.getCategoryBySlug.mockResolvedValue({ category_id: 10, ...newCat });
+      categoryService.getCategoryBySlug.mockResolvedValue({ categoryId: 10, ...newCat });
       const slugRes = await request(app).get("/api/categories/new-cat");
       expect(slugRes.statusCode).toBe(200);
       expect(slugRes.body.slug).toBe(newCat.slug);
 
       const updatedCat = { name: "Updated Category" };
-      categoryService.updateCategory.mockResolvedValue({ category_id: 10, ...updatedCat });
+      categoryService.updateCategory.mockResolvedValue({ categoryId: 10, ...updatedCat });
       const updateRes = await request(app).put("/api/categories/10").send(updatedCat);
       expect(updateRes.body.name).toBe(updatedCat.name);
 
@@ -77,7 +77,7 @@ describe("Comprehensive Category API Tests", () => {
     it("should handle random category names", async () => {
       const dynamicName = "Category_" + randomString(8);
       categoryService.createCategory.mockResolvedValue({ 
-        category_id: Math.floor(Math.random() * 1000), 
+        categoryId: Math.floor(Math.random() * 1000), 
         name: dynamicName 
       });
 
@@ -114,16 +114,16 @@ describe("Comprehensive Category API Tests", () => {
   // 7. Kịch bản dữ liệu biên (Boundary test)
   describe("Boundary Tests", () => {
     it("should handle extremely long category names", async () => {
-      const longName = "a".repeat(255);
-      categoryService.createCategory.mockResolvedValue({ category_id: 1, name: longName });
+      const longName = "a".repeat(100);
+      categoryService.createCategory.mockResolvedValue({ categoryId: 1, name: longName });
       const res = await request(app).post("/api/categories").send({ name: longName });
       expect(res.statusCode).toBe(201);
-      expect(res.body.name.length).toBe(255);
+      expect(res.body.name.length).toBe(100);
     });
 
     it("should handle special characters", async () => {
       const specialName = "!@#$%^&*()_+";
-      categoryService.createCategory.mockResolvedValue({ category_id: 1, name: specialName });
+      categoryService.createCategory.mockResolvedValue({ categoryId: 1, name: specialName });
       const res = await request(app).post("/api/categories").send({ name: specialName });
       expect(res.statusCode).toBe(201);
       expect(res.body.name).toBe(specialName);

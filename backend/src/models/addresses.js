@@ -1,13 +1,15 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('addresses', {
-    address_id: {
+    addressId: {
+      field: 'address_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
+    userId: {
+      field: 'user_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -15,15 +17,18 @@ module.exports = function(sequelize, DataTypes) {
         key: 'user_id'
       }
     },
-    recipient_name: {
+    recipientName: {
+      field: 'recipient_name',
       type: DataTypes.STRING(255),
       allowNull: true
     },
-    phone_number: {
+    phoneNumber: {
+      field: 'phone_number',
       type: DataTypes.STRING(20),
       allowNull: true
     },
-    address_line: {
+    addressLine: {
+      field: 'address_line',
       type: DataTypes.STRING(500),
       allowNull: true
     },
@@ -31,7 +36,8 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(100),
       allowNull: true
     },
-    is_default: {
+    isDefault: {
+      field: 'is_default',
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: 0
@@ -39,7 +45,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'addresses',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

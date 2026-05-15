@@ -2,7 +2,8 @@ const categoryService = require("../services/categoryService");
 const asyncHandler = require("../utils/asyncHandler");
 
 const getAllCategories = asyncHandler(async (req, res) => {
-  const categories = await categoryService.getAllCategories();
+  const { parentId } = req.query;
+  const categories = await categoryService.getAllCategories(parentId);
   res.json(categories);
 });
 

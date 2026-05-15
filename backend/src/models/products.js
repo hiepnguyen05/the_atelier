@@ -1,16 +1,23 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('products', {
-    product_id: {
+    productId: {
+      field: 'product_id',
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    sku_base: {
+    skuBase: {
+      field: 'sku_base',
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: "sku_base"
+    },
+    stock: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0
     },
     name: {
       type: DataTypes.STRING(255),
@@ -21,7 +28,17 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       unique: "slug"
     },
-    category_id: {
+    brandId: {
+      field: 'brand_id',
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'brands',
+        key: 'brand_id'
+      }
+    },
+    categoryId: {
+      field: 'category_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -29,7 +46,8 @@ module.exports = function(sequelize, DataTypes) {
         key: 'category_id'
       }
     },
-    collection_id: {
+    collectionId: {
+      field: 'collection_id',
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -37,7 +55,8 @@ module.exports = function(sequelize, DataTypes) {
         key: 'collection_id'
       }
     },
-    base_price: {
+    basePrice: {
+      field: 'base_price',
       type: DataTypes.DECIMAL(19,2),
       allowNull: false
     },
@@ -49,7 +68,8 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: true
     },
-    care_instructions: {
+    careInstructions: {
+      field: 'care_instructions',
       type: DataTypes.TEXT,
       allowNull: true
     },
@@ -57,16 +77,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.ENUM('active','inactive','archived'),
       allowNull: true,
       defaultValue: "active"
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     }
   }, {
     sequelize,
     tableName: 'products',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",
