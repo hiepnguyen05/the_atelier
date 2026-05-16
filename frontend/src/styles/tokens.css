@@ -1,0 +1,22 @@
+:root {
+  /* Color Palette - Exactly from Sample */
+  --color-primary: #5e5e5e;
+  --color-on-primary: #f8f8f8;
+  --color-secondary: #785a1a;
+  --color-on-secondary: #fff8f1;
+  --color-background: #fcf9f8;
+  --color-on-surface: #323233;
+  --color-on-surface-variant: #5f5f5f;
+  --color-surface-variant: #e4e2e2;
+  --color-surface-container: #f0eded;
+  --color-surface-container-low: #f6f3f2;
+  --color-surface-container-high: #eae8e7;
+  --color-surface-tint: #5e5e5e;
+  --color-outline: #7b7b7a;
+  --color-outline-variant: #b2b2b1;
+  
+  /* Typography */
+  --font-headline: 'Newsreader', serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-label: 'Manrope', sans-serif;
+}

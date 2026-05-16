@@ -1,0 +1,50 @@
+/* Header & Navbar Styles */
+.glass {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 1050;
+}
+
+.nav-link {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant) !important;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--color-on-surface) !important;
+}
+
+/* Spacing Helpers */
+.py-section {
+  padding-top: 8rem;
+  padding-bottom: 8rem;
+}
+
+@media (max-width: 768px) {
+  .py-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+/* Footer Styles */
+footer {
+  background-color: #f6f3f2;
+}
+
+footer a {
+  text-decoration: none;
+  color: var(--color-on-surface-variant);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+footer a:hover {
+  letter-spacing: 0.1em;
+  color: var(--color-on-surface);
+}

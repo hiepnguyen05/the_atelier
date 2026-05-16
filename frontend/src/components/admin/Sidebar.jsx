@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { name: 'Tổng quan', icon: 'dashboard', path: '/admin/dashboard' },
   { name: 'Sản phẩm', icon: 'straighten', path: '/admin/products' },
   { name: 'Danh mục', icon: 'category', path: '/admin/categories' },
+  { name: 'Bộ sưu tập', icon: 'auto_awesome_motion', path: '/admin/collections' },
   { name: 'Đơn hàng', icon: 'shopping_bag', path: '/admin/orders' },
   { name: 'Khách hàng', icon: 'group', path: '/admin/customers' },
   { name: 'Thống kê', icon: 'analytics', path: '/admin/analytics' },
@@ -13,6 +15,7 @@ const navItems = [
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -63,9 +66,16 @@ const Sidebar = ({ isOpen, onClose }) => {
             />
           </div>
           <div>
-            <p className="font-body text-[11px] font-bold uppercase tracking-wider">Admin User</p>
-            <p className="font-body text-[9px] text-on-surface-variant tracking-tighter">Quản trị viên cao cấp</p>
+            <p className="font-body text-[11px] font-bold uppercase tracking-wider line-clamp-1">{user?.fullName || 'Admin'}</p>
+            <p className="font-body text-[9px] text-on-surface-variant tracking-tighter">Quản trị viên</p>
           </div>
+          <button 
+            onClick={logout} 
+            className="ml-auto text-on-surface-variant hover:text-error transition-colors flex items-center"
+            title="Đăng xuất"
+          >
+            <span className="material-symbols-outlined text-[18px]">logout</span>
+          </button>
         </div>
       </div>
       </aside>

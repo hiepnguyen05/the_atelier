@@ -6,8 +6,10 @@ import CategoryStats from '../../components/category/CategoryStats';
 import CategoryTable from '../../components/category/CategoryTable';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import { useCategories } from '../../hooks/useCategories';
+import { useToast } from '../../contexts/ToastContext';
 
 const CategoryList = () => {
+  const { showToast } = useToast();
   const {
     categories,
     loading,
@@ -62,9 +64,10 @@ const CategoryList = () => {
       } else {
         await createCategory(data);
       }
+      showToast('Đã lưu danh mục thành công');
       setIsFormOpen(false);
     } catch (err) {
-      alert('Lỗi khi lưu danh mục: ' + (err.response?.data?.message || err.message));
+      showToast('Lỗi khi lưu danh mục: ' + (err.response?.data?.message || err.message), 'error');
     }
   };
 
@@ -76,9 +79,10 @@ const CategoryList = () => {
   const handleConfirmDelete = async () => {
     try {
       await deleteCategory(deletingId);
+      showToast('Đã xóa danh mục');
       setIsConfirmOpen(false);
     } catch (err) {
-      alert('Lỗi khi xóa danh mục: ' + (err.response?.data?.message || err.message));
+      showToast('Lỗi khi xóa danh mục: ' + (err.response?.data?.message || err.message), 'error');
     }
   };
 

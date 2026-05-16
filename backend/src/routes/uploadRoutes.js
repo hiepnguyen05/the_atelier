@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { uploadImage } = require("../utils/cloudinaryUtils");
 const asyncHandler = require("../utils/asyncHandler");
+const { protect, authorize } = require("../middlewares/authMiddleware");
 
-// Sử dụng body-parser với giới hạn lớn để nhận Base64
-router.post("/", asyncHandler(async (req, res) => {
+// Admin only routes
+router.post("/", protect, authorize('admin'), asyncHandler(async (req, res) => {
   const { image, folder } = req.body;
   
   if (!image) {

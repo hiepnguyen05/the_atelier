@@ -13,6 +13,7 @@ var _payments = require("./payments");
 var _product_images = require("./product_images");
 var _product_variants = require("./product_variants");
 var _products = require("./products");
+var _product_categories = require("./product_categories");
 var _review_images = require("./review_images");
 var _reviews = require("./reviews");
 var _roles = require("./roles");
@@ -34,6 +35,7 @@ function initModels(sequelize) {
   var product_images = _product_images(sequelize, DataTypes);
   var product_variants = _product_variants(sequelize, DataTypes);
   var products = _products(sequelize, DataTypes);
+  var product_categories = _product_categories(sequelize, DataTypes);
   var review_images = _review_images(sequelize, DataTypes);
   var reviews = _reviews(sequelize, DataTypes);
   var roles = _roles(sequelize, DataTypes);
@@ -46,8 +48,15 @@ function initModels(sequelize) {
   cart.hasMany(cart_items, { as: "cartItems", foreignKey: "cartId"});
   categories.belongsTo(categories, { as: "parent", foreignKey: "parentId"});
   categories.hasMany(categories, { as: "subCategories", foreignKey: "parentId"});
-  products.belongsTo(categories, { as: "category", foreignKey: "categoryId"});
-  categories.hasMany(products, { as: "products", foreignKey: "categoryId"});
+  
+  // Many-to-Many Products <-> Categories
+  products.belongsToMany(categories, { as: "categories", through: product_categories, foreignKey: "productId", otherKey: "categoryId" });
+  categories.belongsToMany(products, { as: "products", through: product_categories, foreignKey: "categoryId", otherKey: "productId" });
+  
+  // Keep the single categoryId for now to avoid breaking changes, but move towards many-to-many
+  products.belongsTo(categories, { as: "primaryCategory", foreignKey: "categoryId"});
+  categories.hasMany(products, { as: "primaryProducts", foreignKey: "categoryId"});
+
   products.belongsTo(collections, { as: "collection", foreignKey: "collectionId"});
   collections.hasMany(products, { as: "products", foreignKey: "collectionId"});
   products.belongsTo(brands, { as: "brand", foreignKey: "brandId"});
@@ -102,6 +111,7 @@ function initModels(sequelize) {
     product_images,
     product_variants,
     products,
+    product_categories,
     review_images,
     reviews,
     roles,

@@ -23,9 +23,16 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
         </div>
       </td>
       <td className="py-6 px-8">
-        <span className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-          {product.category?.name || 'N/A'}
-        </span>
+        <div className="flex flex-col gap-1">
+          <span className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
+            {product.categories && product.categories.length > 0 
+              ? product.categories.map(c => c.name).join(', ') 
+              : 'N/A'}
+          </span>
+          <span className="font-body text-[9px] text-on-surface-variant opacity-60 uppercase tracking-tighter">
+            {product.brand?.name || 'Không có thương hiệu'}
+          </span>
+        </div>
       </td>
       <td className="py-6 px-8">
         <span className="font-body text-sm text-on-surface font-bold">
@@ -38,7 +45,7 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
             ? 'bg-success-container text-on-success-container' 
             : 'bg-error-container text-on-error-container'
         }`}>
-          {product.status}
+          {product.status === 'active' ? 'Hoạt động' : 'Tạm ngưng'}
         </span>
       </td>
       <td className="py-6 px-8 text-right">
@@ -71,7 +78,7 @@ const ProductTable = ({ products, loading, onEdit, onDelete }) => {
           <thead>
             <tr className="bg-surface-container border-b border-outline-variant/10">
               <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Sản phẩm</th>
-              <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Danh mục</th>
+              <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Phân loại</th>
               <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Giá cơ bản</th>
               <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-center">Trạng thái</th>
               <th className="py-6 px-8 font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-right">Thao tác</th>

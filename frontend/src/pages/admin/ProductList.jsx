@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import ProductTable from '../../components/product/ProductTable';
 import ProductForm from '../../components/product/ProductForm';
+import ProductFilters from '../../components/product/ProductFilters';
 import { useProducts } from '../../hooks/useProducts';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import { useToast } from '../../contexts/ToastContext';
 
 const ProductList = () => {
+  const { showToast } = useToast();
   const {
     products,
     pagination,
@@ -40,9 +43,10 @@ const ProductList = () => {
       } else {
         await createProduct(data);
       }
+      showToast('Sản phẩm đã được lưu thành công');
       setIsFormOpen(false);
     } catch (err) {
-      alert('Lỗi khi lưu sản phẩm: ' + (err.response?.data?.message || err.message));
+      showToast('Lỗi khi lưu sản phẩm: ' + (err.response?.data?.message || err.message), 'error');
     }
   };
 
@@ -54,9 +58,10 @@ const ProductList = () => {
   const handleConfirmDelete = async () => {
     try {
       await deleteProduct(deletingId);
+      showToast('Đã xóa sản phẩm');
       setIsConfirmOpen(false);
     } catch (err) {
-      alert('Lỗi khi xóa sản phẩm: ' + (err.response?.data?.message || err.message));
+      showToast('Lỗi khi xóa sản phẩm: ' + (err.response?.data?.message || err.message), 'error');
     }
   };
 
@@ -84,11 +89,14 @@ const ProductList = () => {
         </div>
       </section>
 
+      {/* Filters Section */}
+      <ProductFilters params={params} onFilterChange={setParams} />
+
       {/* Filter & Pagination Info */}
-      <div className="flex justify-between items-center mb-8 bg-surface-container-low/50 px-8 py-4 border border-outline-variant/5">
+      <div className="flex justify-between items-center mb-8 bg-surface-container-low/30 px-8 py-4 border border-outline-variant/5">
         <div className="flex gap-8">
           <span className="font-label text-[10px] text-on-surface-variant tracking-wider uppercase">
-            Tổng cộng: <span className="text-on-surface font-bold">{pagination.totalItems} sản phẩm</span>
+            Kết quả: <span className="text-on-surface font-bold">{pagination.totalItems} sản phẩm</span>
           </span>
           <span className="font-label text-[10px] text-on-surface-variant tracking-wider uppercase">
             Trang: <span className="text-on-surface font-bold">{pagination.currentPage} / {pagination.totalPages}</span>

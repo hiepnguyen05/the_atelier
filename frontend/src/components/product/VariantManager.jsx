@@ -1,17 +1,5 @@
 import React from 'react';
-
-const LUXURY_PALETTE = [
-  { name: 'Midnight Black', code: '#000000' },
-  { name: 'Pearl White', code: '#FFFFFF' },
-  { name: 'Silk Beige', code: '#F5F5DC' },
-  { name: 'Antique Gold', code: '#FFD700' },
-  { name: 'Royal Blue', code: '#0047AB' },
-  { name: 'Emerald Green', code: '#043927' },
-  { name: 'Ruby Red', code: '#E0115F' },
-  { name: 'Charcoal Slate', code: '#36454F' },
-  { name: 'Champagne', code: '#F7E7CE' },
-  { name: 'Rose Quartz', code: '#F7CAC9' }
-];
+import { LUXURY_PALETTE } from '../../constants/productConstants';
 
 const VariantManager = ({ variants, onChange, skuBase }) => {
   const addVariant = () => {

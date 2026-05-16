@@ -1,161 +1,40 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { categoryService, collectionService, brandService } from '../../services/api';
-import CategoryPicker from './CategoryPicker';
-import BrandPicker from './BrandPicker';
+import React from 'react';
+import { COMMON_MATERIALS } from '../../constants/productConstants';
+import { useToast } from '../../contexts/ToastContext';
+import { useProductForm } from '../../hooks/useProductForm';
+import CategoryPicker from '../category/CategoryPicker';
+import BrandPicker from '../brand/BrandPicker';
 import ImageUploadManager from './ImageUploadManager';
 import VariantManager from './VariantManager';
 
-const COMMON_MATERIALS = [
-  'Silk (Lụa)', 'Cotton', 'Satin', 'Linen', 'Wool (Len)', 
-  'Leather (Da)', 'Cashmere', 'Chiffon', 'Organza', 'Velvet (Nhung)',
-  'Lace (Ren)', 'Tweed', 'Denim', 'Polyester'
-];
-
-// Helper to remove Vietnamese accents
-const removeAccents = (str) => {
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D');
-};
-
 const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
-  const [categories, setCategories] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [brands, setBrands] = useState([]);
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    categoryId: '',
-    collectionId: '',
-    brandId: '',
-    basePrice: 0,
-    stock: 0,
-    skuBase: '',
-    description: '',
-    material: '',
-    careInstructions: '',
-    status: 'active',
-    slug: '',
-    images: [],
-    variants: []
-  });
-
-  const fetchData = async () => {
-    try {
-      const [catRes, colRes, brandRes] = await Promise.all([
-        categoryService.getAll(),
-        collectionService.getAll(),
-        brandService.getAll()
-      ]);
-      setCategories(catRes.data);
-      setCollections(colRes.data);
-      setBrands(brandRes.data);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        setFormData({
-          ...initialData,
-          collectionId: initialData.collectionId || '',
-          brandId: initialData.brandId || '',
-          stock: initialData.stock || 0,
-          images: initialData.productImages || [],
-          variants: initialData.productVariants || []
-        });
-      } else {
-        setFormData({
-          name: '',
-          categoryId: '',
-          collectionId: '',
-          brandId: '',
-          basePrice: 0,
-          stock: 0,
-          skuBase: '',
-          description: '',
-          material: '',
-          careInstructions: '',
-          status: 'active',
-          slug: '',
-          images: [],
-          variants: []
-        });
-      }
-    }
-  }, [isOpen, initialData]);
-
-  // AUTOMATION: Auto-SKU & Auto-SEO
-  useEffect(() => {
-    if (!initialData && formData.name) {
-      // 1. Auto-Slug (SEO)
-      const autoSlug = removeAccents(formData.name)
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
-      
-      // 2. Auto-SKU Logic (No accents)
-      let autoSku = formData.skuBase;
-      if (!formData.skuBase && formData.categoryId) {
-        const selectedCat = categories.find(c => c.categoryId === formData.categoryId);
-        const cleanCatName = removeAccents(selectedCat ? selectedCat.name : 'GEN');
-        const cleanProdName = removeAccents(formData.name);
-        
-        const prefix = cleanCatName.substring(0, 3).toUpperCase();
-        const namePart = cleanProdName.substring(0, 3).toUpperCase();
-        autoSku = `${prefix}-${namePart}-${Math.floor(1000 + Math.random() * 9000)}`;
-      }
-
-      setFormData(prev => ({ 
-        ...prev, 
-        slug: autoSlug,
-        skuBase: autoSku
-      }));
-    }
-  }, [formData.name, formData.categoryId, categories, initialData]);
-
-  // Sync Total Stock from variants if they exist
-  useEffect(() => {
-    if (formData.variants.length > 0) {
-      const total = formData.variants.reduce((acc, curr) => acc + (curr.stockQuantity || 0), 0);
-      if (total !== formData.stock) {
-        setFormData(prev => ({ ...prev, stock: total }));
-      }
-    }
-  }, [formData.variants]);
-
-  const handleQuickAddBrand = async (name) => {
-    try {
-      const response = await brandService.create({ name });
-      setBrands(prev => [...prev, response.data]);
-      setFormData(prev => ({ ...prev, brandId: response.data.brandId }));
-    } catch (err) {
-      alert('Lỗi khi tạo thương hiệu mới.');
-    }
-  };
-
-  if (!isOpen) return null;
+  const { showToast } = useToast();
+  const {
+    formData,
+    categories,
+    collections,
+    brands,
+    updateFormData,
+    handleQuickAddBrand
+  } = useProductForm(initialData, isOpen);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.categoryIds.length === 0) {
+      showToast('Vui lòng chọn ít nhất một danh mục', 'error');
+      return;
+    }
+
     const submissionData = {
       ...formData,
       collectionId: formData.collectionId === '' ? null : parseInt(formData.collectionId),
       brandId: formData.brandId === '' ? null : parseInt(formData.brandId),
-      categoryId: parseInt(formData.categoryId),
       stock: parseInt(formData.stock)
     };
     onSave(submissionData);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-on-background/40 backdrop-blur-md p-0 md:p-8">
@@ -192,7 +71,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => updateFormData({ name: e.target.value })}
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-2xl focus:outline-none focus:border-secondary transition-colors"
                 placeholder="VD: Premium Silk Slip Dress"
               />
@@ -202,7 +81,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <BrandPicker 
                 brands={brands} 
                 value={formData.brandId} 
-                onChange={(val) => setFormData({ ...formData, brandId: val })}
+                onChange={(val) => updateFormData({ brandId: val })}
                 onQuickAdd={handleQuickAddBrand}
               />
             </div>
@@ -210,8 +89,8 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
             <div className="md:col-span-4">
               <CategoryPicker 
                 categories={categories} 
-                value={formData.categoryId} 
-                onChange={(val) => setFormData({ ...formData, categoryId: val })} 
+                value={formData.categoryIds} 
+                onChange={(val) => updateFormData({ categoryIds: val })} 
               />
             </div>
 
@@ -219,7 +98,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Bộ sưu tập</label>
               <select
                 value={formData.collectionId}
-                onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
+                onChange={(e) => updateFormData({ collectionId: e.target.value })}
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
               >
                 <option value="">Chọn bộ sưu tập (Không bắt buộc)</option>
@@ -236,7 +115,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                   type="number"
                   required
                   value={formData.basePrice}
-                  onChange={(e) => setFormData({ ...formData, basePrice: parseInt(e.target.value) })}
+                  onChange={(e) => updateFormData({ basePrice: parseInt(e.target.value) })}
                   className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-lg focus:outline-none focus:border-secondary"
                 />
               </div>
@@ -244,7 +123,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                 <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block flex justify-between items-center">
                   Tồn kho
                   {formData.variants.length > 0 && (
-                    <span className="text-[7px] bg-secondary/10 text-secondary px-1 py-0.5 font-bold animate-pulse">AUTO</span>
+                    <span className="text-[7px] bg-secondary/10 text-secondary px-1 py-0.5 font-bold animate-pulse">TỰ ĐỘNG</span>
                   )}
                 </label>
                 <input
@@ -252,7 +131,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                   min="0"
                   value={formData.stock}
                   readOnly={formData.variants.length > 0}
-                  onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                  onChange={(e) => updateFormData({ stock: parseInt(e.target.value) })}
                   className={`w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-lg focus:outline-none focus:border-secondary ${formData.variants.length > 0 ? 'opacity-60 cursor-not-allowed text-secondary' : ''}`}
                 />
               </div>
@@ -268,7 +147,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
             <div className="md:col-span-12">
               <ImageUploadManager 
                 images={formData.images} 
-                onChange={(newImages) => setFormData({ ...formData, images: newImages })} 
+                onChange={(newImages) => updateFormData({ images: newImages })} 
               />
             </div>
           </section>
@@ -283,7 +162,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <VariantManager 
                 variants={formData.variants} 
                 skuBase={formData.skuBase}
-                onChange={(newVariants) => setFormData({ ...formData, variants: newVariants })} 
+                onChange={(newVariants) => updateFormData({ variants: newVariants })} 
               />
             </div>
           </section>
@@ -300,23 +179,23 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <div className="flex flex-wrap gap-2 mb-4">
                 {COMMON_MATERIALS.map(m => (
                   <button
-                    key={m}
+                    key={m.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, material: m })}
+                    onClick={() => updateFormData({ material: m.name })}
                     className={`px-3 py-1 font-body text-[10px] border transition-all ${
-                      formData.material === m 
+                      formData.material === m.name 
                         ? 'bg-secondary text-white border-secondary' 
                         : 'border-outline-variant/30 text-on-surface-variant hover:border-secondary'
                     }`}
                   >
-                    {m}
+                    {m.name}
                   </button>
                 ))}
               </div>
               <input
                 type="text"
                 value={formData.material}
-                onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                onChange={(e) => updateFormData({ material: e.target.value })}
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
                 placeholder="Hoặc tự nhập chất liệu khác..."
               />
@@ -328,7 +207,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                 type="text"
                 required
                 value={formData.skuBase}
-                onChange={(e) => setFormData({ ...formData, skuBase: e.target.value })}
+                onChange={(e) => updateFormData({ skuBase: e.target.value })}
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
               />
             </div>
@@ -337,7 +216,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Mô tả sản phẩm</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => updateFormData({ description: e.target.value })}
                 className="w-full bg-transparent border border-outline-variant/20 p-6 font-body text-sm focus:outline-none focus:border-secondary min-h-[150px]"
               />
             </div>
@@ -345,8 +224,8 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
             <div className="md:col-span-12">
               <div className="p-8 bg-surface-container-low border border-outline-variant/10">
                 <div className="flex justify-between items-start mb-4">
-                   <h5 className="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">SEO Preview</h5>
-                   <span className="bg-success-container text-on-success-container text-[8px] px-2 py-0.5 rounded-full uppercase font-bold">Optimized</span>
+                   <h5 className="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Xem trước SEO</h5>
+                   <span className="bg-success-container text-on-success-container text-[8px] px-2 py-0.5 rounded-full uppercase font-bold">Đã tối ưu</span>
                 </div>
                 <h4 className="text-blue-700 font-body text-xl hover:underline cursor-pointer">
                   {formData.name || 'Tên sản phẩm'} | {brands.find(b => b.brandId === formData.brandId)?.name || 'The Atelier'}

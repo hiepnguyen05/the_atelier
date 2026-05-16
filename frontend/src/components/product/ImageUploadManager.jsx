@@ -1,50 +1,23 @@
-import React, { useState } from 'react';
-import api from '../../services/api';
+import React from 'react';
+import { useImageUpload } from '../../hooks/useImageUpload';
 
 const ImageUploadManager = ({ images, onChange }) => {
-  const [uploading, setUploading] = useState(false);
+  const { uploading, uploadImages } = useImageUpload('products');
 
   const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    const urls = await uploadImages(e.target.files);
+    if (urls.length > 0) {
+      const newUploadedImages = urls.map(url => ({
+        imageUrl: url,
+        isPrimary: false
+      }));
 
-    setUploading(true);
-    try {
-      const uploadPromises = files.map(async (file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = async () => {
-            try {
-              const res = await api.post('/upload', { 
-                image: reader.result,
-                folder: 'products'
-              });
-              resolve({
-                imageUrl: res.data.url,
-                isPrimary: false
-              });
-            } catch (err) {
-              reject(err);
-            }
-          };
-          reader.onerror = reject;
-        });
-      });
-
-      const newUploadedImages = await Promise.all(uploadPromises);
-      
       // Nếu là ảnh đầu tiên, set nó làm ảnh chính
+      const currentImages = [...images, ...newUploadedImages];
       if (images.length === 0 && newUploadedImages.length > 0) {
-        newUploadedImages[0].isPrimary = true;
+        currentImages[0].isPrimary = true;
       }
-
-      onChange([...images, ...newUploadedImages]);
-    } catch (err) {
-      console.error('Upload error:', err);
-      alert('Lỗi khi tải ảnh lên Cloudinary.');
-    } finally {
-      setUploading(false);
+      onChange(currentImages);
     }
   };
 
@@ -95,7 +68,7 @@ const ImageUploadManager = ({ images, onChange }) => {
             
             {img.isPrimary && (
               <div className="absolute top-2 left-2 bg-secondary text-white px-2 py-0.5 font-label text-[8px] uppercase tracking-widest">
-                Primary
+                Ảnh chính
               </div>
             )}
           </div>
