@@ -4,6 +4,7 @@ import Footer from './components/layout/Footer'
 import Home from './pages/Home'
 import CategoryList from './pages/admin/CategoryList'
 import ProductList from './pages/admin/ProductList'
+import CustomerList from './pages/admin/CustomerList'
 import CollectionList from './pages/admin/CollectionList'
 import Dashboard from './pages/admin/Dashboard'
 import { ToastProvider } from './contexts/ToastContext';
@@ -58,6 +59,11 @@ function App() {
             <Route path="/admin/products" element={
               <ProtectedRoute requiredRole="admin">
                 <ProductList />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/customers" element={
+              <ProtectedRoute requiredRole="admin">
+                <CustomerList />
               </ProtectedRoute>
             } />
             <Route path="/admin/collections" element={

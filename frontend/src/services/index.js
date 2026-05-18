@@ -4,3 +4,4 @@ export { categoryService } from './categoryService';
 export { collectionService } from './collectionService';
 export { brandService } from './brandService';
 export { authService } from './authService';
+export { userService } from './userService';
