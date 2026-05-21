@@ -40,7 +40,6 @@ const getProducts = async (query) => {
       [Op.in]: sequelize.literal(`(
         SELECT product_id FROM product_categories 
         WHERE category_id = ${parseInt(categoryId)} 
-        AND deleted_at IS NULL
       )`)
     };
   }
@@ -177,12 +176,57 @@ const updateProduct = async (id, productData) => {
 
     // 4. Cập nhật biến thể
     if (variants) {
-      await models.product_variants.destroy({ where: { productId: id }, transaction });
-      const variantData = variants.map(v => {
-        const { variantId, createdAt, updatedAt, deletedAt, ...cleanVariant } = v;
-        return { ...cleanVariant, productId: id };
+      // Lấy tất cả biến thể hiện tại của sản phẩm (bao gồm cả các bản ghi đã xóa mềm)
+      const existingVariants = await models.product_variants.findAll({
+        where: { productId: id },
+        paranoid: false,
+        transaction
       });
-      await models.product_variants.bulkCreate(variantData, { transaction });
+
+      // Tạo map để tra cứu nhanh bản ghi cũ
+      const existingById = new Map();
+      const existingBySku = new Map();
+      existingVariants.forEach(ev => {
+        if (ev.variantId) existingById.set(ev.variantId, ev);
+        if (ev.skuVariant) existingBySku.set(ev.skuVariant, ev);
+      });
+
+      const activeVariantIds = new Set();
+
+      for (const v of variants) {
+        const { variantId, createdAt, updatedAt, deletedAt, ...cleanVariant } = v;
+        
+        let matchedVariant = null;
+        if (variantId && existingById.has(variantId)) {
+          matchedVariant = existingById.get(variantId);
+        } else if (cleanVariant.skuVariant && existingBySku.has(cleanVariant.skuVariant)) {
+          matchedVariant = existingBySku.get(cleanVariant.skuVariant);
+        }
+
+        if (matchedVariant) {
+          // Khôi phục nếu đang bị xóa mềm
+          if (matchedVariant.deletedAt) {
+            await matchedVariant.restore({ transaction });
+          }
+          // Cập nhật thông tin mới
+          await matchedVariant.update(cleanVariant, { transaction });
+          activeVariantIds.add(matchedVariant.variantId);
+        } else {
+          // Tạo mới hoàn toàn
+          const newVar = await models.product_variants.create({
+            ...cleanVariant,
+            productId: id
+          }, { transaction });
+          activeVariantIds.add(newVar.variantId);
+        }
+      }
+
+      // Xóa mềm các biến thể trước đây của sản phẩm nhưng không có trong danh sách gửi lên
+      for (const ev of existingVariants) {
+        if (!ev.deletedAt && !activeVariantIds.has(ev.variantId)) {
+          await ev.destroy({ transaction });
+        }
+      }
     }
 
     await transaction.commit();

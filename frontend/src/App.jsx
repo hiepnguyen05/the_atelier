@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import Home from './pages/Home'
+import ProductCatalog from './pages/ProductCatalog'
+import ProductDetail from './pages/ProductDetail'
 import CategoryList from './pages/admin/CategoryList'
 import ProductList from './pages/admin/ProductList'
 import CustomerList from './pages/admin/CustomerList'
@@ -26,6 +28,26 @@ function App() {
                 <Header />
                 <main>
                   <Home />
+                </main>
+                <Footer />
+              </>
+            } />
+            
+            <Route path="/products" element={
+              <>
+                <Header />
+                <main>
+                  <ProductCatalog />
+                </main>
+                <Footer />
+              </>
+            } />
+
+            <Route path="/products/:slug" element={
+              <>
+                <Header />
+                <main>
+                  <ProductDetail />
                 </main>
                 <Footer />
               </>

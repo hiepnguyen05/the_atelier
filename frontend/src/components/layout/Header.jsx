@@ -28,10 +28,10 @@ const Header = () => {
           </button>
           
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
-            <Link to="/" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface border-b border-on-surface pb-1">BỘ SƯU TẬP</Link>
-            <Link to="/" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">DANH MỤC</Link>
+            <Link to="/products" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface border-b border-on-surface pb-1">BỘ SƯU TẬP</Link>
+            <Link to="/products" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">DANH MỤC</Link>
             <Link to="/" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">CÂU CHUYỆN</Link>
-            <Link to="/" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">LƯU TRỮ</Link>
+            <Link to="/products" className="font-label text-[9px] lg:text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">LƯU TRỮ</Link>
           </div>
         </div>
 
@@ -79,10 +79,10 @@ const Header = () => {
       <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out border-t border-outline-variant/5 bg-white ${isMenuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="px-8 py-10 space-y-8">
           <div className="flex flex-col gap-6">
-            <Link to="/" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>BỘ SƯU TẬP</Link>
-            <Link to="/" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>DANH MỤC</Link>
+            <Link to="/products" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>BỘ SƯU TẬP</Link>
+            <Link to="/products" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>DANH MỤC</Link>
             <Link to="/" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>CÂU CHUYỆN</Link>
-            <Link to="/" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>LƯU TRỮ</Link>
+            <Link to="/products" className="font-label text-[11px] tracking-[0.2em] text-on-surface no-underline" onClick={() => setIsMenuOpen(false)}>LƯU TRỮ</Link>
           </div>
           
           <hr className="border-outline-variant/10" />

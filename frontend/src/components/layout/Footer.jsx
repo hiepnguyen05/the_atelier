@@ -29,10 +29,10 @@ const Footer = () => {
               <div>
                 <span className="font-label text-on-surface-variant mb-6 block text-[10px] font-bold">ĐIỀU HƯỚNG</span>
                 <ul className="space-y-4 list-none p-0">
-                  <li><Link to="/" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">BỘ SƯU TẬP</Link></li>
-                  <li><Link to="/" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">DANH MỤC</Link></li>
+                  <li><Link to="/products" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">BỘ SƯU TẬP</Link></li>
+                  <li><Link to="/products" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">DANH MỤC</Link></li>
                   <li><Link to="/" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">TẬP SAN</Link></li>
-                  <li><Link to="/" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">LƯU TRỮ</Link></li>
+                  <li><Link to="/products" className="font-label text-[10px] text-on-surface no-underline hover:text-secondary transition-colors">LƯU TRỮ</Link></li>
                 </ul>
               </div>
               <div>

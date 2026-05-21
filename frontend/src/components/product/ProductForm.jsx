@@ -18,6 +18,23 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
     handleQuickAddBrand
   } = useProductForm(initialData, isOpen);
 
+  const activeCategory = categories.find(
+    cat => cat.categoryId === parseInt(formData.categoryId) && cat.attributeConfig
+  ) || categories.find(
+    cat => formData.categoryIds.includes(cat.categoryId) && cat.attributeConfig
+  );
+  
+  let parsedConfig = null;
+  if (activeCategory?.attributeConfig) {
+    try {
+      parsedConfig = typeof activeCategory.attributeConfig === 'string'
+        ? JSON.parse(activeCategory.attributeConfig)
+        : activeCategory.attributeConfig;
+    } catch (e) {
+      console.error("Error parsing attribute config:", e);
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.categoryIds.length === 0) {
@@ -27,6 +44,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
 
     const submissionData = {
       ...formData,
+      categoryId: formData.categoryId === '' ? null : parseInt(formData.categoryId),
       collectionId: formData.collectionId === '' ? null : parseInt(formData.collectionId),
       brandId: formData.brandId === '' ? null : parseInt(formData.brandId),
       stock: parseInt(formData.stock)
@@ -90,9 +108,46 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <CategoryPicker 
                 categories={categories} 
                 value={formData.categoryIds} 
-                onChange={(val) => updateFormData({ categoryIds: val })} 
+                onChange={(val) => {
+                  const updates = { categoryIds: val };
+                  if (val.length === 1) {
+                    updates.categoryId = val[0];
+                  } else if (val.length === 0) {
+                    updates.categoryId = '';
+                  } else if (val.length > 1 && !val.includes(parseInt(formData.categoryId))) {
+                    updates.categoryId = val[0];
+                  }
+                  updateFormData(updates);
+                }} 
               />
             </div>
+
+            {formData.categoryIds.length > 1 && (
+              <div className="md:col-span-4">
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">
+                  Danh mục chính <span className="text-secondary font-bold">*</span>
+                </label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => updateFormData({ categoryId: e.target.value ? parseInt(e.target.value) : '' })}
+                  className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+                  required
+                >
+                  <option value="" disabled>-- Chọn danh mục chính --</option>
+                  {categories
+                    .filter(cat => formData.categoryIds.includes(cat.categoryId))
+                    .map(cat => (
+                      <option key={cat.categoryId} value={cat.categoryId}>
+                        {cat.name}
+                      </option>
+                    ))
+                  }
+                </select>
+                <p className="text-[9px] text-on-surface-variant opacity-60 mt-1.5 italic">
+                  * Dùng để xác định thông số đặc thù của sản phẩm.
+                </p>
+              </div>
+            )}
 
             <div className="md:col-span-4">
               <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Bộ sưu tập</label>
@@ -162,6 +217,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               <VariantManager 
                 variants={formData.variants} 
                 skuBase={formData.skuBase}
+                attributeConfig={parsedConfig}
                 onChange={(newVariants) => updateFormData({ variants: newVariants })} 
               />
             </div>
@@ -201,11 +257,49 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               />
             </div>
 
+            {parsedConfig?.specs_definition?.length > 0 ? (
+              <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-container-low/40 p-6 border border-outline-variant/10">
+                <div className="md:col-span-2 border-b border-outline-variant/10 pb-2">
+                  <h5 className="font-label text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Thông số đặc thù của danh mục</h5>
+                </div>
+                {parsedConfig.specs_definition.map(spec => (
+                  <div key={spec.key} className="space-y-2">
+                    <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">{spec.label}</label>
+                    <textarea
+                      value={formData.specifications?.[spec.key] || ''}
+                      onChange={(e) => {
+                        const newSpecs = { ...formData.specifications, [spec.key]: e.target.value };
+                        updateFormData({ specifications: newSpecs });
+                      }}
+                      rows={2}
+                      className="w-full bg-transparent border border-outline-variant/20 p-3 font-body text-sm focus:outline-none focus:border-secondary resize-y"
+                      placeholder={`Nhập ${spec.label.toLowerCase()}...`}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="md:col-span-12 space-y-2">
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block font-bold">Thông số sản phẩm (Tự do)</label>
+                <textarea
+                  value={formData.specifications?.custom_specs || ''}
+                  onChange={(e) => {
+                    const newSpecs = { ...formData.specifications, custom_specs: e.target.value };
+                    updateFormData({ specifications: newSpecs });
+                  }}
+                  rows={4}
+                  className="w-full bg-transparent border border-outline-variant/20 p-4 font-body text-sm focus:outline-none focus:border-secondary resize-y"
+                  placeholder="Nhập các thông số chi tiết khác của sản phẩm (mỗi thông số một dòng, ví dụ:&#13;Chất liệu: Bạc Ý 925&#13;Đường kính: 15 mm&#13;Trọng lượng: 2.5g)..."
+                />
+              </div>
+            )}
+
             <div className="md:col-span-4">
               <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Mã SKU gốc</label>
               <input
                 type="text"
                 required
+                autoComplete="off"
                 value={formData.skuBase}
                 onChange={(e) => updateFormData({ skuBase: e.target.value })}
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"

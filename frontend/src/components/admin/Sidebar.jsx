@@ -31,7 +31,15 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div className="mb-12">
         <h1 className="font-headline text-2xl tracking-widest text-on-surface dark:text-on-primary uppercase mb-1">The Atelier</h1>
         <p className="font-body text-[10px] tracking-[0.2em] uppercase text-on-surface-variant opacity-60">Hệ thống Quản trị</p>
+        <Link 
+          to="/"
+          className="mt-4 inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary hover:border-secondary transition-all font-body text-[9px] uppercase tracking-widest border border-outline-variant/30 px-3 py-1.5"
+        >
+          <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+          Xem cửa hàng
+        </Link>
       </div>
+
       <nav className="flex flex-col gap-y-6">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;

@@ -29,6 +29,11 @@ module.exports = function(sequelize, DataTypes) {
     description: {
       type: DataTypes.STRING(500),
       allowNull: true
+    },
+    attributeConfig: {
+      field: 'attribute_config',
+      type: DataTypes.JSON,
+      allowNull: true
     }
   }, {
     sequelize,

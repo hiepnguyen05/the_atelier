@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const AdminHeader = ({ title = "TÌM KIẾM...", onMenuOpen }) => {
   return (
@@ -20,6 +21,13 @@ const AdminHeader = ({ title = "TÌM KIẾM...", onMenuOpen }) => {
         </div>
       </div>
       <div className="flex items-center gap-8">
+        <Link 
+          to="/"
+          className="flex items-center gap-2 border border-outline-variant/30 px-3 py-1.5 text-on-surface-variant hover:text-secondary hover:border-secondary transition-all font-label text-[10px] tracking-widest uppercase"
+        >
+          <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+          Xem cửa hàng
+        </Link>
         <button className="relative hover:opacity-70 transition-opacity">
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
           <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-secondary rounded-full"></span>

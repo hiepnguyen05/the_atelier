@@ -11,6 +11,7 @@ export const useProductForm = (initialData, isOpen) => {
   
   const [formData, setFormData] = useState({
     name: '',
+    categoryId: '',
     categoryIds: [],
     collectionId: '',
     brandId: '',
@@ -23,7 +24,8 @@ export const useProductForm = (initialData, isOpen) => {
     status: 'active',
     slug: '',
     images: [],
-    variants: []
+    variants: [],
+    specifications: {}
   });
 
   const fetchData = async () => {
@@ -51,16 +53,19 @@ export const useProductForm = (initialData, isOpen) => {
       if (initialData) {
         setFormData({
           ...initialData,
+          categoryId: initialData.categoryId || '',
           categoryIds: initialData.categories ? initialData.categories.map(c => c.categoryId) : [],
           collectionId: initialData.collectionId || '',
           brandId: initialData.brandId || '',
           stock: initialData.stock || 0,
           images: initialData.productImages || [],
-          variants: initialData.productVariants || []
+          variants: initialData.productVariants || [],
+          specifications: initialData.specifications || {}
         });
       } else {
         setFormData({
           name: '',
+          categoryId: '',
           categoryIds: [],
           collectionId: '',
           brandId: '',
@@ -73,7 +78,8 @@ export const useProductForm = (initialData, isOpen) => {
           status: 'active',
           slug: '',
           images: [],
-          variants: []
+          variants: [],
+          specifications: {}
         });
       }
     }

@@ -26,7 +26,7 @@ module.exports = function(sequelize) {
     sequelize,
     tableName: "product_categories",
     timestamps: true,
-    paranoid: true, // Bật chế độ xóa mềm để đồng bộ với hệ thống
+    paranoid: false, // Tắt xóa mềm đối với bảng trung gian để tránh lỗi trùng khóa chính khi cập nhật liên kết
     underscored: true,
   });
 };

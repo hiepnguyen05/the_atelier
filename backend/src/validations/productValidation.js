@@ -15,6 +15,7 @@ const productSchema = Joi.object({
   careInstructions: Joi.string().allow(null, ""),
   status: Joi.string().valid("active", "inactive", "archived").default("active"),
   slug: Joi.string().max(255).allow(null, ""),
+  specifications: Joi.any().optional(),
   
   // Cho phép các trường meta
   createdAt: Joi.any().optional(),

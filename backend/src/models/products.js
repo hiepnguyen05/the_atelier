@@ -77,6 +77,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.ENUM('active','inactive','archived'),
       allowNull: true,
       defaultValue: "active"
+    },
+    specifications: {
+      field: 'specifications',
+      type: DataTypes.JSON,
+      allowNull: true
     }
   }, {
     sequelize,

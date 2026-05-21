@@ -23,10 +23,10 @@ const Home = () => {
           </h2>
           
           <div className="flex flex-col md:flex-row md:items-center gap-12 max-w-5xl">
-            <button className="bg-white text-on-surface px-12 py-5 font-label text-[11px] tracking-[0.2em] font-bold hover:bg-on-surface hover:text-white transition-all duration-500 flex items-center gap-4 w-fit">
+            <Link to="/products" className="bg-white text-on-surface px-12 py-5 font-label text-[11px] tracking-[0.2em] font-bold hover:bg-on-surface hover:text-white transition-all duration-500 flex items-center gap-4 w-fit no-underline">
               KHÁM PHÁ BỘ SƯU TẬP
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </button>
+            </Link>
             <p className="text-white/60 font-body text-sm md:text-base leading-relaxed max-w-xs font-light">
               Cuộc đối thoại giữa lụa mềm mại và những hình khối kiến trúc. Định nghĩa lại di sản hiện đại qua lăng kính của Digital Atelier.
             </p>
@@ -45,21 +45,21 @@ const Home = () => {
                 Từng món đồ được tạo tác với ý niệm độc bản. Những thiết kế mới nhất của chúng tôi tập trung vào sự phong phú của xúc giác và tính ứng dụng vượt thời gian.
               </p>
             </div>
-            <Link to="/" className="font-label text-[10px] tracking-[0.2em] text-on-surface border-b border-outline-variant/30 pb-2 hover:border-on-surface transition-all uppercase no-underline">
+            <Link to="/products" className="font-label text-[10px] tracking-[0.2em] text-on-surface border-b border-outline-variant/30 pb-2 hover:border-on-surface transition-all uppercase no-underline">
               XEM TẤT CẢ DANH MỤC
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-20">
             {/* Large Feature */}
-            <div className="md:col-span-7 group cursor-pointer">
+            <Link to="/products" className="md:col-span-7 group cursor-pointer no-underline text-on-background">
               <div className="relative aspect-[4/5] overflow-hidden bg-surface-variant mb-6">
                 <img 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6RCBogpyB1f3Wp766SQLOW_0_W8teUFyhzVg9TtAJT1m__IzGxqmC8uqS3k0lvTMBW3X34jjCevvZHcZ2n06FN_J8a647zeyz0KmHh6MhcoyonoAQ2j4FVMqGsHulcll8ofx24FNhMTvLIt6MC4teLk4XSVzO8WxbVRTc_GUqYdOW8dQlTjIXlRCb3X7APZ21YPutFo9rKJZ2NEZ8F4Zy2Rg_861RzCzor_rCY8pS9ZFr0CMEkdRaPazao1CrrOkPXPkDOhl-uJg" 
                   alt="Featured Product" 
                   className="w-full h-full object-cover grayscale-[0.1] group-hover:scale-105 transition-transform duration-1000"
                 />
-                <div className="absolute top-6 left-6 bg-white/80 backdrop-blur-md px-4 py-2 font-label text-[9px] tracking-widest">
+                <div className="absolute top-6 left-6 bg-white/80 backdrop-blur-md px-4 py-2 font-label text-[9px] tracking-widest text-on-surface">
                   THIẾT KẾ ĐẶC TRƯNG
                 </div>
               </div>
@@ -70,11 +70,11 @@ const Home = () => {
                 </div>
                 <span className="font-headline text-2xl italic">1,240 USD</span>
               </div>
-            </div>
+            </Link>
 
             {/* Small Stacked */}
             <div className="md:col-span-5 flex flex-col gap-16 md:pt-24">
-              <div className="group cursor-pointer">
+              <Link to="/products" className="group cursor-pointer no-underline text-on-background">
                 <div className="aspect-square overflow-hidden bg-surface-variant mb-6">
                   <img 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAL-b-0M1Km7kmr39S4TFygwpirQ5IoWv_SHw_OGoCi-nK_ezK8gHq3X0GXZN4ZKHufCsLfRRaOGRT30F-8Ujf5CfuzUAMvaoKBfk2ryHsaCP3zzlD8uDRUrqX00QOBIr_QR6eSU5G42QHGejct5TQtM59mYx6VbB1vAladPkfaGmbx4Laqa6ccNQnodDDPEkbv4vGOBz0eqL2nkHMJgLg-t1uts2gIKMbPImcjtUkgYCybllZ7mKe0-evgNhB9j7Dm5dLaAL9LtE" 
@@ -86,9 +86,9 @@ const Home = () => {
                   <h4 className="font-headline text-lg mb-1">Áo Sơ Mi Lụa Organza</h4>
                   <span className="font-headline text-lg italic">480 USD</span>
                 </div>
-              </div>
+              </Link>
 
-              <div className="group cursor-pointer">
+              <Link to="/products" className="group cursor-pointer no-underline text-on-background">
                 <div className="aspect-[3/4] overflow-hidden bg-surface-variant mb-6">
                   <img 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY8kNl67XW9vuf3-WBMHvz1VtMxxc2xi8OYvf5L1EK1dmNcnDplq8WnCJY6T-jkDaJ3XNio223vi_pUKILc40nBOxdHwYSulW7OTk9je5NEexJyebVO7Dvlv-qz1DlAytsLOLHWVPMBywJHXPySAKBF68sspmwa112RvMcpo5tLUFU1n65nGVbeLAfLRvInjTt5VKnR26NyooyKljJkAr3mgkrgXQt69hQZH-3jg3OMV1leNd5vMXC2S3s_5JRhe9jJ0YK1gurqVc" 
@@ -100,7 +100,7 @@ const Home = () => {
                   <h4 className="font-headline text-lg mb-1">Túi Cầm Tay Envelope</h4>
                   <span className="font-headline text-lg italic">890 USD</span>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

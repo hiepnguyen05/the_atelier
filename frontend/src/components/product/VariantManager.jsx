@@ -1,7 +1,14 @@
 import React from 'react';
 import { LUXURY_PALETTE } from '../../constants/productConstants';
 
-const VariantManager = ({ variants, onChange, skuBase }) => {
+const VariantManager = ({ variants, onChange, skuBase, attributeConfig }) => {
+  const sizeLabel = attributeConfig?.variant_size_label !== undefined 
+    ? attributeConfig.variant_size_label 
+    : "Kích cỡ (Size)";
+  const colorLabel = attributeConfig?.variant_color_label !== undefined 
+    ? attributeConfig.variant_color_label 
+    : "Màu sắc";
+
   const addVariant = () => {
     const newVariant = {
       skuVariant: `${skuBase}-${variants.length + 1}`,
@@ -36,7 +43,11 @@ const VariantManager = ({ variants, onChange, skuBase }) => {
       <div className="flex justify-between items-center border-b border-outline-variant/10 pb-4">
         <div>
           <label className="font-label text-[11px] uppercase tracking-widest text-on-surface font-bold">Biến thể sản phẩm</label>
-          <p className="font-body text-[10px] text-on-surface-variant opacity-60">Kích thước, màu sắc và số lượng tồn kho</p>
+          <p className="font-body text-[10px] text-on-surface-variant opacity-60">
+            {sizeLabel && colorLabel 
+              ? `${sizeLabel}, ${colorLabel.toLowerCase()} và số lượng tồn kho` 
+              : `${sizeLabel || colorLabel || 'Thông tin'} và số lượng tồn kho`}
+          </p>
         </div>
         <button
           type="button"
@@ -59,72 +70,77 @@ const VariantManager = ({ variants, onChange, skuBase }) => {
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className={`grid grid-cols-1 gap-8 ${sizeLabel && colorLabel ? 'md:grid-cols-3' : (sizeLabel || colorLabel ? 'md:grid-cols-2' : 'md:grid-cols-1')}`}>
               {/* SKU & Size */}
               <div className="space-y-6">
                 <div>
                   <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">Mã SKU Biến thể</label>
                   <input
                     type="text"
+                    autoComplete="off"
                     value={v.skuVariant}
                     onChange={(e) => updateVariant(index, 'skuVariant', e.target.value)}
                     className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
                   />
                 </div>
-                <div>
-                  <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">Kích cỡ (Size)</label>
-                  <input
-                    type="text"
-                    placeholder="S, M, L, XL..."
-                    value={v.sizeName}
-                    onChange={(e) => updateVariant(index, 'sizeName', e.target.value)}
-                    className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
-                  />
-                </div>
+                {sizeLabel && (
+                  <div>
+                    <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">{sizeLabel}</label>
+                    <input
+                      type="text"
+                      placeholder="Nhập kích cỡ/phân loại..."
+                      value={v.sizeName || ''}
+                      onChange={(e) => updateVariant(index, 'sizeName', e.target.value)}
+                      className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Color Selection */}
-              <div className="md:col-span-2 space-y-4">
-                <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">Bảng màu Atelier</label>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {LUXURY_PALETTE.map((color) => (
-                    <button
-                      key={color.name}
-                      type="button"
-                      onClick={() => handlePaletteSelect(index, color)}
-                      className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-125 ${
-                        v.colorCode === color.code ? 'border-secondary scale-110 shadow-lg' : 'border-outline-variant/20'
-                      }`}
-                      style={{ backgroundColor: color.code }}
-                      title={color.name}
+              {colorLabel && (
+                <div className={`${sizeLabel ? 'md:col-span-2' : 'md:col-span-1'} space-y-4`}>
+                  <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">{colorLabel}</label>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    {LUXURY_PALETTE.map((color) => (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => handlePaletteSelect(index, color)}
+                        className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-125 ${
+                          v.colorCode === color.code ? 'border-secondary scale-110 shadow-lg' : 'border-outline-variant/20'
+                        }`}
+                        style={{ backgroundColor: color.code }}
+                        title={color.name}
+                      />
+                    ))}
+                    <div className="w-px h-8 bg-outline-variant/20 mx-2" />
+                    <input
+                      type="color"
+                      value={v.colorCode || '#000000'}
+                      onChange={(e) => updateVariant(index, 'colorCode', e.target.value)}
+                      className="w-8 h-8 border-0 p-0 cursor-pointer bg-transparent"
+                      title="Tùy chỉnh màu"
                     />
-                  ))}
-                  <div className="w-px h-8 bg-outline-variant/20 mx-2" />
+                  </div>
                   <input
-                    type="color"
-                    value={v.colorCode}
-                    onChange={(e) => updateVariant(index, 'colorCode', e.target.value)}
-                    className="w-8 h-8 border-0 p-0 cursor-pointer bg-transparent"
-                    title="Tùy chỉnh màu"
+                    type="text"
+                    placeholder={`Tên ${colorLabel.toLowerCase()} (VD: Midnight Black)`}
+                    value={v.colorName || ''}
+                    onChange={(e) => updateVariant(index, 'colorName', e.target.value)}
+                    className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
                   />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Tên màu sắc (VD: Midnight Black)"
-                  value={v.colorName}
-                  onChange={(e) => updateVariant(index, 'colorName', e.target.value)}
-                  className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
-                />
-              </div>
+              )}
 
               {/* Stock & Price */}
-              <div className="md:col-span-3 grid grid-cols-2 gap-8 pt-4 border-t border-outline-variant/5">
+              <div className={`${sizeLabel && colorLabel ? 'md:col-span-3' : (sizeLabel || colorLabel ? 'md:col-span-2' : 'md:col-span-1')} grid grid-cols-2 gap-8 pt-4 border-t border-outline-variant/5`}>
                 <div>
                   <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">Số lượng tồn kho</label>
                   <input
                     type="number"
                     min="0"
-                    value={v.stockQuantity}
+                    value={v.stockQuantity || 0}
                     onChange={(e) => updateVariant(index, 'stockQuantity', parseInt(e.target.value))}
                     className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
                   />
@@ -133,7 +149,7 @@ const VariantManager = ({ variants, onChange, skuBase }) => {
                   <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">Phụ phí (Nếu có)</label>
                   <input
                     type="number"
-                    value={v.priceAdjustment}
+                    value={v.priceAdjustment || 0}
                     onChange={(e) => updateVariant(index, 'priceAdjustment', parseInt(e.target.value))}
                     className="w-full bg-transparent border-b border-outline-variant/20 py-2 font-body text-xs focus:outline-none focus:border-secondary"
                   />
