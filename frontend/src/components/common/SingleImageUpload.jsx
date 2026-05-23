@@ -1,5 +1,5 @@
 import React from 'react';
-import { useImageUpload } from '../../hooks/useImageUpload';
+import { useImageUpload } from '../../hooks/admin/useImageUpload';
 
 const SingleImageUpload = ({ imageUrl, onChange, placeholder = "Tải ảnh lên...", folder = "collections", aspectRatio = "aspect-[16/9]" }) => {
   const { uploading, uploadSingleImage } = useImageUpload(folder);

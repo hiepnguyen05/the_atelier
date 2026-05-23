@@ -1,4 +1,5 @@
 import React from 'react';
+import Loading from '../common/Loading';
 
 const CustomerRow = ({ user, onToggleStatus, onUpdateRole }) => {
   const avatarImage = user.avatarUrl;
@@ -92,9 +93,8 @@ const CustomerTable = ({ users, loading, onToggleStatus, onUpdateRole }) => {
           <tbody className="divide-y divide-outline-variant/5">
             {loading ? (
               <tr>
-                <td colSpan="5" className="py-20 text-center">
-                  <div className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 font-body text-xs text-on-surface-variant opacity-60 uppercase tracking-widest">Đang tải danh sách...</p>
+                <td colSpan="5" className="py-12">
+                  <Loading size={70} text="Đang tải danh sách..." />
                 </td>
               </tr>
             ) : users.length === 0 ? (

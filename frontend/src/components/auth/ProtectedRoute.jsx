@@ -1,17 +1,14 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Loading from '../common/Loading';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
     const { user, loading, isAdmin } = useAuth();
     const location = useLocation();
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-surface">
-                <div className="font-serif text-xl tracking-widest animate-pulse uppercase">Đang tải...</div>
-            </div>
-        );
+        return <Loading fullPage text="Đang xác thực quyền truy cập..." />;
     }
 
     if (!user) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { userService } from '../services';
-import { useToast } from '../contexts/ToastContext';
+import { userService } from '../../services';
+import { useToast } from '../../contexts/ToastContext';
 
 export const useCustomers = () => {
   const [users, setUsers] = useState([]);

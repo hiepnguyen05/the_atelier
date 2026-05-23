@@ -5,7 +5,7 @@ import CategoryForm from '../../components/category/CategoryForm';
 import CategoryStats from '../../components/category/CategoryStats';
 import CategoryTable from '../../components/category/CategoryTable';
 import ConfirmModal from '../../components/common/ConfirmModal';
-import { useCategories } from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/admin/useCategories';
 import { useToast } from '../../contexts/ToastContext';
 
 const CategoryList = () => {

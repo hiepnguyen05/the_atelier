@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import CustomerTable from '../../components/customer/CustomerTable';
-import { useCustomers } from '../../hooks/useCustomers';
+import { useCustomers } from '../../hooks/admin/useCustomers';
 import ConfirmModal from '../../components/common/ConfirmModal';
 
 const CustomerList = () => {

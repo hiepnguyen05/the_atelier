@@ -1,8 +1,8 @@
 import React from 'react';
 import { COMMON_MATERIALS } from '../../constants/productConstants';
+import { getProductTypeOptions, getProductTypeConfig, GENDERS } from '../../constants/productTypes';
 import { useToast } from '../../contexts/ToastContext';
-import { useProductForm } from '../../hooks/useProductForm';
-import CategoryPicker from '../category/CategoryPicker';
+import { useProductForm } from '../../hooks/admin/useProductForm';
 import BrandPicker from '../brand/BrandPicker';
 import ImageUploadManager from './ImageUploadManager';
 import VariantManager from './VariantManager';
@@ -12,40 +12,62 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
   const {
     formData,
     categories,
-    collections,
     brands,
     updateFormData,
     handleQuickAddBrand
   } = useProductForm(initialData, isOpen);
 
-  const activeCategory = categories.find(
-    cat => cat.categoryId === parseInt(formData.categoryId) && cat.attributeConfig
-  ) || categories.find(
-    cat => formData.categoryIds.includes(cat.categoryId) && cat.attributeConfig
-  );
-  
-  let parsedConfig = null;
-  if (activeCategory?.attributeConfig) {
-    try {
-      parsedConfig = typeof activeCategory.attributeConfig === 'string'
-        ? JSON.parse(activeCategory.attributeConfig)
-        : activeCategory.attributeConfig;
-    } catch (e) {
-      console.error("Error parsing attribute config:", e);
-    }
-  }
+  const productTypeConfig = getProductTypeConfig(formData.productType);
+  const typeOptions = getProductTypeOptions();
+
+  // Helper to render nested categories as interactive checkboxes
+  const renderCategoryCheckboxes = (cats, level = 0) => {
+    return cats.map(cat => {
+      const isChecked = formData.categoryIds?.includes(cat.categoryId) || false;
+      return (
+        <div key={cat.categoryId} className="space-y-1">
+          <div className="flex items-center gap-3 py-1.5" style={{ paddingLeft: `${level * 20}px` }}>
+            <input
+              type="checkbox"
+              id={`cat-check-${cat.categoryId}`}
+              checked={isChecked}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                let newIds = [...(formData.categoryIds || [])];
+                if (checked) {
+                  newIds.push(cat.categoryId);
+                } else {
+                  newIds = newIds.filter(id => id !== cat.categoryId);
+                }
+                updateFormData({ 
+                  categoryIds: newIds,
+                  categoryId: newIds.length > 0 ? newIds[0] : ''
+                });
+              }}
+              className="w-4 h-4 cursor-pointer accent-secondary rounded border-outline-variant/30 text-secondary focus:ring-secondary"
+            />
+            <label htmlFor={`cat-check-${cat.categoryId}`} className="font-body text-xs cursor-pointer text-on-surface hover:text-secondary select-none">
+              {cat.name}
+            </label>
+          </div>
+          {cat.subCategories && cat.subCategories.length > 0 && 
+            renderCategoryCheckboxes(cat.subCategories, level + 1)}
+        </div>
+      );
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.categoryIds.length === 0) {
+    if (!formData.categoryIds || formData.categoryIds.length === 0) {
       showToast('Vui lòng chọn ít nhất một danh mục', 'error');
       return;
     }
 
     const submissionData = {
       ...formData,
-      categoryId: formData.categoryId === '' ? null : parseInt(formData.categoryId),
-      collectionId: formData.collectionId === '' ? null : parseInt(formData.collectionId),
+      categoryIds: formData.categoryIds.map(id => parseInt(id)),
+      categoryId: parseInt(formData.categoryIds[0]),
       brandId: formData.brandId === '' ? null : parseInt(formData.brandId),
       stock: parseInt(formData.stock)
     };
@@ -80,11 +102,11 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
           <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12 gap-y-10">
             <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-4">
               <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">01. Thông tin cốt lõi</h4>
-              <p className="font-body text-xs text-on-surface-variant opacity-60">Xác định danh tính và giá trị tồn kho của sản phẩm</p>
+              <p className="font-body text-xs text-on-surface-variant opacity-60">Xác định danh tính và loại sản phẩm</p>
             </div>
 
-            <div className="md:col-span-8">
-              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Tên Sản phẩm</label>
+            <div className="md:col-span-12">
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Tên Sản phẩm <span className="text-secondary font-bold">*</span></label>
               <input
                 type="text"
                 required
@@ -93,6 +115,64 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                 className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-2xl focus:outline-none focus:border-secondary transition-colors"
                 placeholder="VD: Premium Silk Slip Dress"
               />
+            </div>
+
+            <div className="md:col-span-4 space-y-3">
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">
+                Loại sản phẩm <span className="text-secondary font-bold">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.productType}
+                  onChange={(e) => updateFormData({ productType: e.target.value })}
+                  className="w-full bg-surface-container border border-outline-variant/20 p-3 font-body text-sm focus:outline-none focus:border-secondary appearance-none cursor-pointer"
+                  required
+                >
+                  {typeOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+              </div>
+              <p className="text-[9px] text-on-surface-variant opacity-60 italic">
+                * Quyết định các thông số kỹ thuật và biến thể bên dưới.
+              </p>
+            </div>
+
+            <div className="md:col-span-4 space-y-3">
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">
+                Danh mục hiển thị <span className="text-secondary font-bold">* (Chọn nhiều)</span>
+              </label>
+              <div className="border border-outline-variant/20 bg-surface-container/30 p-4 max-h-[160px] overflow-y-auto space-y-1 rounded shadow-inner">
+                {categories.length > 0 ? (
+                  renderCategoryCheckboxes(categories)
+                ) : (
+                  <p className="font-body text-xs text-on-surface-variant/40 italic p-2 text-center">Đang tải danh mục...</p>
+                )}
+              </div>
+              <p className="text-[9px] text-on-surface-variant opacity-60 italic">
+                * Vị trí hiển thị sản phẩm trên cửa hàng.
+              </p>
+            </div>
+
+            <div className="md:col-span-4 space-y-3">
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Giới tính</label>
+              <div className="flex bg-surface-container border border-outline-variant/20 p-1">
+                {GENDERS.map(gender => (
+                  <button
+                    key={gender.value}
+                    type="button"
+                    onClick={() => updateFormData({ gender: gender.value })}
+                    className={`flex-1 py-2 font-label text-[10px] uppercase tracking-widest transition-colors ${
+                      formData.gender === gender.value 
+                        ? 'bg-secondary text-white font-bold shadow-sm' 
+                        : 'text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    {gender.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="md:col-span-4">
@@ -104,71 +184,13 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               />
             </div>
 
-            <div className="md:col-span-4">
-              <CategoryPicker 
-                categories={categories} 
-                value={formData.categoryIds} 
-                onChange={(val) => {
-                  const updates = { categoryIds: val };
-                  if (val.length === 1) {
-                    updates.categoryId = val[0];
-                  } else if (val.length === 0) {
-                    updates.categoryId = '';
-                  } else if (val.length > 1 && !val.includes(parseInt(formData.categoryId))) {
-                    updates.categoryId = val[0];
-                  }
-                  updateFormData(updates);
-                }} 
-              />
-            </div>
-
-            {formData.categoryIds.length > 1 && (
-              <div className="md:col-span-4">
-                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">
-                  Danh mục chính <span className="text-secondary font-bold">*</span>
-                </label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) => updateFormData({ categoryId: e.target.value ? parseInt(e.target.value) : '' })}
-                  className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
-                  required
-                >
-                  <option value="" disabled>-- Chọn danh mục chính --</option>
-                  {categories
-                    .filter(cat => formData.categoryIds.includes(cat.categoryId))
-                    .map(cat => (
-                      <option key={cat.categoryId} value={cat.categoryId}>
-                        {cat.name}
-                      </option>
-                    ))
-                  }
-                </select>
-                <p className="text-[9px] text-on-surface-variant opacity-60 mt-1.5 italic">
-                  * Dùng để xác định thông số đặc thù của sản phẩm.
-                </p>
-              </div>
-            )}
-
-            <div className="md:col-span-4">
-              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Bộ sưu tập</label>
-              <select
-                value={formData.collectionId}
-                onChange={(e) => updateFormData({ collectionId: e.target.value })}
-                className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
-              >
-                <option value="">Chọn bộ sưu tập (Không bắt buộc)</option>
-                {collections.map(col => (
-                  <option key={col.collectionId} value={col.collectionId}>{col.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="md:col-span-4 grid grid-cols-2 gap-6 items-start">
+            <div className="md:col-span-8 grid grid-cols-2 gap-6 items-start">
               <div>
-                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Giá cơ bản (VND)</label>
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Giá cơ bản (VND) <span className="text-secondary font-bold">*</span></label>
                 <input
                   type="number"
                   required
+                  min="0"
                   value={formData.basePrice}
                   onChange={(e) => updateFormData({ basePrice: parseInt(e.target.value) })}
                   className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-lg focus:outline-none focus:border-secondary"
@@ -176,7 +198,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               </div>
               <div className="relative">
                 <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block flex justify-between items-center">
-                  Tồn kho
+                  Tồn kho chung
                   {formData.variants.length > 0 && (
                     <span className="text-[7px] bg-secondary/10 text-secondary px-1 py-0.5 font-bold animate-pulse">TỰ ĐỘNG</span>
                   )}
@@ -211,13 +233,13 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
           <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12">
             <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-8">
               <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">03. Biến thể & Tồn kho</h4>
-              <p className="font-body text-xs text-on-surface-variant opacity-60">Chọn màu sắc từ bảng màu Atelier và thiết lập kích cỡ</p>
+              <p className="font-body text-xs text-on-surface-variant opacity-60">Biến thể được điều chỉnh theo loại: <strong className="text-secondary">{productTypeConfig.label}</strong></p>
             </div>
             <div className="md:col-span-12">
               <VariantManager 
                 variants={formData.variants} 
                 skuBase={formData.skuBase}
-                attributeConfig={parsedConfig}
+                attributeConfig={productTypeConfig.variantConfig}
                 onChange={(newVariants) => updateFormData({ variants: newVariants })} 
               />
             </div>
@@ -226,12 +248,12 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
           {/* Section 4: Chi tiết */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12 gap-y-10">
             <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-4">
-              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">04. Chất liệu & Bảo quản</h4>
-              <p className="font-body text-xs text-on-surface-variant opacity-60">Thông tin chi tiết và tối ưu hóa SEO tự động</p>
+              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">04. Chất liệu & Thông số</h4>
+              <p className="font-body text-xs text-on-surface-variant opacity-60">Cấu hình thông số kỹ thuật đặc thù cho <strong className="text-secondary">{productTypeConfig.label}</strong></p>
             </div>
 
-            <div className="md:col-span-8">
-              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Chất liệu</label>
+            <div className="md:col-span-12">
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Chất liệu chính</label>
               <div className="flex flex-wrap gap-2 mb-4">
                 {COMMON_MATERIALS.map(m => (
                   <button
@@ -257,45 +279,44 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
               />
             </div>
 
-            {parsedConfig?.specs_definition?.length > 0 ? (
-              <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-container-low/40 p-6 border border-outline-variant/10">
-                <div className="md:col-span-2 border-b border-outline-variant/10 pb-2">
-                  <h5 className="font-label text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Thông số đặc thù của danh mục</h5>
-                </div>
-                {parsedConfig.specs_definition.map(spec => (
-                  <div key={spec.key} className="space-y-2">
-                    <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">{spec.label}</label>
-                    <textarea
-                      value={formData.specifications?.[spec.key] || ''}
-                      onChange={(e) => {
-                        const newSpecs = { ...formData.specifications, [spec.key]: e.target.value };
-                        updateFormData({ specifications: newSpecs });
-                      }}
-                      rows={2}
-                      className="w-full bg-transparent border border-outline-variant/20 p-3 font-body text-sm focus:outline-none focus:border-secondary resize-y"
-                      placeholder={`Nhập ${spec.label.toLowerCase()}...`}
-                    />
-                  </div>
-                ))}
+            <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-container-low/40 p-6 border border-outline-variant/10">
+              <div className="md:col-span-2 border-b border-outline-variant/10 pb-2">
+                <h5 className="font-label text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Thông số đặc thù: {productTypeConfig.label}</h5>
               </div>
-            ) : (
-              <div className="md:col-span-12 space-y-2">
-                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block font-bold">Thông số sản phẩm (Tự do)</label>
+              
+              {productTypeConfig.specsDefinition.map(spec => (
+                <div key={spec.key} className="space-y-2">
+                  <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">{spec.label}</label>
+                  <input
+                    type="text"
+                    value={formData.specifications?.[spec.key] || ''}
+                    onChange={(e) => {
+                      const newSpecs = { ...formData.specifications, [spec.key]: e.target.value };
+                      updateFormData({ specifications: newSpecs });
+                    }}
+                    className="w-full bg-transparent border-b border-outline-variant/40 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+                    placeholder={`Nhập ${spec.label.toLowerCase()}...`}
+                  />
+                </div>
+              ))}
+
+              <div className="md:col-span-2 space-y-2 mt-4">
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Thông số khác (Tự do)</label>
                 <textarea
                   value={formData.specifications?.custom_specs || ''}
                   onChange={(e) => {
                     const newSpecs = { ...formData.specifications, custom_specs: e.target.value };
                     updateFormData({ specifications: newSpecs });
                   }}
-                  rows={4}
+                  rows={3}
                   className="w-full bg-transparent border border-outline-variant/20 p-4 font-body text-sm focus:outline-none focus:border-secondary resize-y"
-                  placeholder="Nhập các thông số chi tiết khác của sản phẩm (mỗi thông số một dòng, ví dụ:&#13;Chất liệu: Bạc Ý 925&#13;Đường kính: 15 mm&#13;Trọng lượng: 2.5g)..."
+                  placeholder="Nhập các thông số chi tiết khác (mỗi thông số một dòng)..."
                 />
               </div>
-            )}
+            </div>
 
             <div className="md:col-span-4">
-              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Mã SKU gốc</label>
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Mã SKU gốc <span className="text-secondary font-bold">*</span></label>
               <input
                 type="text"
                 required
@@ -314,7 +335,7 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
                 className="w-full bg-transparent border border-outline-variant/20 p-6 font-body text-sm focus:outline-none focus:border-secondary min-h-[150px]"
               />
             </div>
-
+            
             <div className="md:col-span-12">
               <div className="p-8 bg-surface-container-low border border-outline-variant/10">
                 <div className="flex justify-between items-start mb-4">

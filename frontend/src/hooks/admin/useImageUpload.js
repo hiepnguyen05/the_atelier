@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { api } from '../services';
-import { useToast } from '../contexts/ToastContext';
+import { api } from '../../services';
+import { useToast } from '../../contexts/ToastContext';
 
 export const useImageUpload = (folder = 'products') => {
   const [uploading, setUploading] = useState(false);

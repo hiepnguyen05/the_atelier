@@ -46,14 +46,16 @@ module.exports = function(sequelize, DataTypes) {
         key: 'category_id'
       }
     },
-    collectionId: {
-      field: 'collection_id',
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'collections',
-        key: 'collection_id'
-      }
+    productType: {
+      field: 'product_type',
+      type: DataTypes.ENUM('clothing_top', 'clothing_bottom', 'shoes', 'slippers', 'eyewear', 'bag', 'perfume'),
+      allowNull: false,
+      defaultValue: 'clothing_top'
+    },
+    gender: {
+      type: DataTypes.ENUM('nam', 'nu', 'unisex'),
+      allowNull: false,
+      defaultValue: 'unisex'
     },
     basePrice: {
       field: 'base_price',
@@ -121,10 +123,10 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "fk_2",
+        name: "idx_product_type",
         using: "BTREE",
         fields: [
-          { name: "collection_id" },
+          { name: "product_type" },
         ]
       },
       {

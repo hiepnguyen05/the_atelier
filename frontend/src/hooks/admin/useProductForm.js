@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { categoryService, collectionService, brandService } from '../services';
-import { useToast } from '../contexts/ToastContext';
-import { generateSlug, removeAccents } from '../utils/stringUtils';
+import { categoryService, brandService } from '../../services';
+import { useToast } from '../../contexts/ToastContext';
+import { generateSlug, removeAccents } from '../../utils/stringUtils';
 
 export const useProductForm = (initialData, isOpen) => {
   const { showToast } = useToast();
   const [categories, setCategories] = useState([]);
-  const [collections, setCollections] = useState([]);
   const [brands, setBrands] = useState([]);
   
   const [formData, setFormData] = useState({
     name: '',
     categoryId: '',
     categoryIds: [],
-    collectionId: '',
+    productType: 'clothing_top',
+    gender: 'unisex',
     brandId: '',
     basePrice: 0,
     stock: 0,
@@ -30,13 +30,11 @@ export const useProductForm = (initialData, isOpen) => {
 
   const fetchData = async () => {
     try {
-      const [catRes, colRes, brandRes] = await Promise.all([
+      const [catRes, brandRes] = await Promise.all([
         categoryService.getAll(),
-        collectionService.getAll(),
         brandService.getAll()
       ]);
       setCategories(catRes.data);
-      setCollections(colRes.data.collections || colRes.data);
       setBrands(brandRes.data);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -54,8 +52,9 @@ export const useProductForm = (initialData, isOpen) => {
         setFormData({
           ...initialData,
           categoryId: initialData.categoryId || '',
-          categoryIds: initialData.categories ? initialData.categories.map(c => c.categoryId) : [],
-          collectionId: initialData.collectionId || '',
+          categoryIds: initialData.categories?.map(c => c.categoryId) || (initialData.categoryId ? [initialData.categoryId] : []),
+          productType: initialData.productType || 'clothing_top',
+          gender: initialData.gender || 'unisex',
           brandId: initialData.brandId || '',
           stock: initialData.stock || 0,
           images: initialData.productImages || [],
@@ -67,7 +66,8 @@ export const useProductForm = (initialData, isOpen) => {
           name: '',
           categoryId: '',
           categoryIds: [],
-          collectionId: '',
+          productType: 'clothing_top',
+          gender: 'unisex',
           brandId: '',
           basePrice: 0,
           stock: 0,
@@ -123,7 +123,6 @@ export const useProductForm = (initialData, isOpen) => {
   return {
     formData,
     categories,
-    collections,
     brands,
     updateFormData,
     handleQuickAddBrand

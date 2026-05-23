@@ -1,10 +1,20 @@
 const request = require("supertest");
 const app = require("../src/app");
 const productService = require("../src/services/productService");
+const jwt = require("jsonwebtoken");
 
 jest.mock("../src/services/productService");
 
 describe("Product API Tests", () => {
+  let adminToken;
+
+  beforeAll(() => {
+    adminToken = jwt.sign(
+      { userId: 1, email: "admin@example.com", role: "admin" },
+      process.env.JWT_SECRET || "your_default_jwt_secret"
+    );
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -58,7 +68,10 @@ describe("Product API Tests", () => {
 
       productService.createProduct.mockResolvedValue(mockResponse);
 
-      const res = await request(app).post("/api/products").send(productData);
+      const res = await request(app)
+        .post("/api/products")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send(productData);
 
       expect(res.statusCode).toBe(201);
       expect(res.body.productId).toBe(100);
@@ -70,7 +83,9 @@ describe("Product API Tests", () => {
     it("should call deleteProduct (soft delete)", async () => {
       productService.deleteProduct.mockResolvedValue(true);
       
-      const res = await request(app).delete("/api/products/1");
+      const res = await request(app)
+        .delete("/api/products/1")
+        .set("Authorization", `Bearer ${adminToken}`);
       
       expect(res.statusCode).toBe(200);
       expect(res.body.message).toContain("successfully");

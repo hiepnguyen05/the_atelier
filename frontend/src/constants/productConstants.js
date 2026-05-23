@@ -21,25 +21,6 @@ export const COMMON_MATERIALS = [
   { id: 'polyester', name: 'Polyester' }
 ];
 
-export const SEASONS = [
-  'Spring/Summer',
-  'Fall/Winter',
-  'Resort',
-  'Pre-Fall',
-  'Special Edition'
-];
-
-export const EDITORIAL_BLOCK_TYPES = {
-  TEXT: 'text',
-  IMAGE: 'image',
-  PRODUCT: 'product_highlight'
-};
-
-export const EDITORIAL_LAYOUTS = [
-  { id: 'full', name: 'Full Width' },
-  { id: 'half', name: 'Half Split' },
-  { id: 'sidebar', name: 'Editorial Sidebar' }
-];
 
 export const LUXURY_PALETTE = [
   { name: 'Midnight Black', code: '#000000' },

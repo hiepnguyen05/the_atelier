@@ -3,7 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import ProductTable from '../../components/product/ProductTable';
 import ProductForm from '../../components/product/ProductForm';
 import ProductFilters from '../../components/product/ProductFilters';
-import { useProducts } from '../../hooks/useProducts';
+import { useProducts } from '../../hooks/admin/useProducts';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import { useToast } from '../../contexts/ToastContext';
 

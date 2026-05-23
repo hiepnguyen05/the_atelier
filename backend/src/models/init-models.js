@@ -5,7 +5,6 @@ var _blog_posts = require("./blog_posts");
 var _cart = require("./cart");
 var _cart_items = require("./cart_items");
 var _categories = require("./categories");
-var _collections = require("./collections");
 var _coupons = require("./coupons");
 var _order_items = require("./order_items");
 var _orders = require("./orders");
@@ -13,12 +12,12 @@ var _payments = require("./payments");
 var _product_images = require("./product_images");
 var _product_variants = require("./product_variants");
 var _products = require("./products");
-var _product_categories = require("./product_categories");
 var _review_images = require("./review_images");
 var _reviews = require("./reviews");
 var _roles = require("./roles");
 var _users = require("./users");
 var _wishlists = require("./wishlists");
+var _product_categories = require("./product_categories");
 
 function initModels(sequelize) {
   var addresses = _addresses(sequelize, DataTypes);
@@ -27,7 +26,6 @@ function initModels(sequelize) {
   var cart = _cart(sequelize, DataTypes);
   var cart_items = _cart_items(sequelize, DataTypes);
   var categories = _categories(sequelize, DataTypes);
-  var collections = _collections(sequelize, DataTypes);
   var coupons = _coupons(sequelize, DataTypes);
   var order_items = _order_items(sequelize, DataTypes);
   var orders = _orders(sequelize, DataTypes);
@@ -35,30 +33,30 @@ function initModels(sequelize) {
   var product_images = _product_images(sequelize, DataTypes);
   var product_variants = _product_variants(sequelize, DataTypes);
   var products = _products(sequelize, DataTypes);
-  var product_categories = _product_categories(sequelize, DataTypes);
   var review_images = _review_images(sequelize, DataTypes);
   var reviews = _reviews(sequelize, DataTypes);
   var roles = _roles(sequelize, DataTypes);
   var users = _users(sequelize, DataTypes);
   var wishlists = _wishlists(sequelize, DataTypes);
+  var product_categories = _product_categories(sequelize, DataTypes);
 
   orders.belongsTo(addresses, { as: "shippingAddress", foreignKey: "shippingAddressId"});
   addresses.hasMany(orders, { as: "orders", foreignKey: "shippingAddressId"});
   cart_items.belongsTo(cart, { as: "cart", foreignKey: "cartId"});
   cart.hasMany(cart_items, { as: "cartItems", foreignKey: "cartId"});
+
+  // Category hierarchy (parent/child)
   categories.belongsTo(categories, { as: "parent", foreignKey: "parentId"});
   categories.hasMany(categories, { as: "subCategories", foreignKey: "parentId"});
-  
-  // Many-to-Many Products <-> Categories
-  products.belongsToMany(categories, { as: "categories", through: product_categories, foreignKey: "productId", otherKey: "categoryId" });
-  categories.belongsToMany(products, { as: "products", through: product_categories, foreignKey: "categoryId", otherKey: "productId" });
-  
-  // Keep the single categoryId for now to avoid breaking changes, but move towards many-to-many
-  products.belongsTo(categories, { as: "primaryCategory", foreignKey: "categoryId"});
-  categories.hasMany(products, { as: "primaryProducts", foreignKey: "categoryId"});
 
-  products.belongsTo(collections, { as: "collection", foreignKey: "collectionId"});
-  collections.hasMany(products, { as: "products", foreignKey: "collectionId"});
+  // Product -> Category (single category per product - backwards compatibility)
+  products.belongsTo(categories, { as: "category", foreignKey: "categoryId"});
+  categories.hasMany(products, { as: "products", foreignKey: "categoryId"});
+
+  // Product -> Categories (many-to-many relationship)
+  products.belongsToMany(categories, { through: product_categories, foreignKey: "productId", otherKey: "categoryId", as: "categories" });
+  categories.belongsToMany(products, { through: product_categories, foreignKey: "categoryId", otherKey: "productId", as: "categorizedProducts" });
+
   products.belongsTo(brands, { as: "brand", foreignKey: "brandId"});
   brands.hasMany(products, { as: "products", foreignKey: "brandId"});
   orders.belongsTo(coupons, { as: "coupon", foreignKey: "couponId"});
@@ -103,7 +101,6 @@ function initModels(sequelize) {
     cart,
     cart_items,
     categories,
-    collections,
     coupons,
     order_items,
     orders,
@@ -111,12 +108,12 @@ function initModels(sequelize) {
     product_images,
     product_variants,
     products,
-    product_categories,
     review_images,
     reviews,
     roles,
     users,
     wishlists,
+    product_categories,
   };
 }
 module.exports = initModels;

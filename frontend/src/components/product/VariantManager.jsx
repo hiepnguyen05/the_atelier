@@ -2,12 +2,9 @@ import React from 'react';
 import { LUXURY_PALETTE } from '../../constants/productConstants';
 
 const VariantManager = ({ variants, onChange, skuBase, attributeConfig }) => {
-  const sizeLabel = attributeConfig?.variant_size_label !== undefined 
-    ? attributeConfig.variant_size_label 
-    : "Kích cỡ (Size)";
-  const colorLabel = attributeConfig?.variant_color_label !== undefined 
-    ? attributeConfig.variant_color_label 
-    : "Màu sắc";
+  const sizeLabel = attributeConfig?.sizeLabel !== undefined ? attributeConfig.sizeLabel : "Kích cỡ";
+  const colorLabel = attributeConfig?.colorLabel !== undefined ? attributeConfig.colorLabel : "Màu sắc";
+  const suggestedSizes = attributeConfig?.suggestedSizes || [];
 
   const addVariant = () => {
     const newVariant = {
@@ -86,6 +83,22 @@ const VariantManager = ({ variants, onChange, skuBase, attributeConfig }) => {
                 {sizeLabel && (
                   <div>
                     <label className="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block font-bold">{sizeLabel}</label>
+                    {suggestedSizes.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {suggestedSizes.map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => updateVariant(index, 'sizeName', s)}
+                            className={`px-2 py-0.5 text-[9px] border transition-colors ${
+                              v.sizeName === s ? 'bg-secondary text-white border-secondary' : 'border-outline-variant/30 text-on-surface-variant hover:border-secondary'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <input
                       type="text"
                       placeholder="Nhập kích cỡ/phân loại..."

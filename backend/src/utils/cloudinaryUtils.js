@@ -34,7 +34,34 @@ const deleteImage = async (public_id) => {
   }
 };
 
+/**
+ * Trích xuất publicId từ Cloudinary URL
+ * @param {string} urlStr 
+ * @returns {string|null}
+ */
+const extractPublicId = (urlStr) => {
+  if (!urlStr || !urlStr.includes("cloudinary.com")) return null;
+  try {
+    const parts = urlStr.split("/upload/");
+    if (parts.length < 2) return null;
+    const pathAfterUpload = parts[1];
+    const pathParts = pathAfterUpload.split("/");
+    if (pathParts[0].startsWith("v")) {
+      pathParts.shift();
+    }
+    const fullPathWithoutVersion = pathParts.join("/");
+    const dotIndex = fullPathWithoutVersion.lastIndexOf(".");
+    if (dotIndex !== -1) {
+      return fullPathWithoutVersion.substring(0, dotIndex);
+    }
+    return fullPathWithoutVersion;
+  } catch (error) {
+    return null;
+  }
+};
+
 module.exports = {
   uploadImage,
   deleteImage,
+  extractPublicId,
 };

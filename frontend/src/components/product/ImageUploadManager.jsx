@@ -1,5 +1,6 @@
 import React from 'react';
-import { useImageUpload } from '../../hooks/useImageUpload';
+import { useImageUpload } from '../../hooks/admin/useImageUpload';
+import { api } from '../../services';
 
 const ImageUploadManager = ({ images, onChange }) => {
   const { uploading, uploadImages } = useImageUpload('products');
@@ -9,7 +10,8 @@ const ImageUploadManager = ({ images, onChange }) => {
     if (urls.length > 0) {
       const newUploadedImages = urls.map(url => ({
         imageUrl: url,
-        isPrimary: false
+        isPrimary: false,
+        isHover: false
       }));
 
       // Nếu là ảnh đầu tiên, set nó làm ảnh chính
@@ -21,20 +23,49 @@ const ImageUploadManager = ({ images, onChange }) => {
     }
   };
 
-  const removeImage = (index) => {
+  const removeImage = async (index) => {
+    const targetImage = images[index];
     const newImages = images.filter((_, i) => i !== index);
+    
     // Nếu xóa ảnh chính, set ảnh đầu tiên còn lại làm chính
-    if (images[index].isPrimary && newImages.length > 0) {
+    if (targetImage.isPrimary && newImages.length > 0) {
       newImages[0].isPrimary = true;
+      newImages[0].isHover = false;
     }
     onChange(newImages);
+
+    // Xóa ảnh trên Cloudinary ngay lập tức nếu là ảnh chưa lưu vào database (không có imageId)
+    if (!targetImage.imageId && targetImage.imageUrl) {
+      try {
+        await api.delete('/upload', { data: { url: targetImage.imageUrl } });
+      } catch (err) {
+        console.error('Failed to delete unsaved image from Cloudinary:', err);
+      }
+    }
   };
 
   const setPrimary = (index) => {
-    const newImages = images.map((img, i) => ({
-      ...img,
-      isPrimary: i === index
-    }));
+    const newImages = images.map((img, i) => {
+      if (i === index) {
+        return { ...img, isPrimary: true, isHover: false };
+      }
+      return { ...img, isPrimary: false };
+    });
+    onChange(newImages);
+  };
+
+  const setHover = (index) => {
+    const newImages = images.map((img, i) => {
+      if (i === index) {
+        const nextHoverState = !img.isHover;
+        return { 
+          ...img, 
+          isHover: nextHoverState, 
+          isPrimary: nextHoverState ? false : img.isPrimary 
+        };
+      }
+      return { ...img, isHover: false };
+    });
     onChange(newImages);
   };
 
@@ -59,6 +90,15 @@ const ImageUploadManager = ({ images, onChange }) => {
               </button>
               <button 
                 type="button"
+                onClick={() => setHover(index)}
+                className={`px-3 py-1 font-label text-[9px] uppercase tracking-widest ${
+                  img.isHover ? 'bg-on-surface-variant text-white' : 'bg-white text-on-surface hover:bg-on-surface-variant hover:text-white'
+                }`}
+              >
+                {img.isHover ? 'Ảnh Hover' : 'Đặt ảnh hover'}
+              </button>
+              <button 
+                type="button"
                 onClick={() => removeImage(index)}
                 className="bg-error text-white px-3 py-1 font-label text-[9px] uppercase tracking-widest hover:bg-error-dim"
               >
@@ -69,6 +109,11 @@ const ImageUploadManager = ({ images, onChange }) => {
             {img.isPrimary && (
               <div className="absolute top-2 left-2 bg-secondary text-white px-2 py-0.5 font-label text-[8px] uppercase tracking-widest">
                 Ảnh chính
+              </div>
+            )}
+            {img.isHover && (
+              <div className="absolute top-2 right-2 bg-on-surface-variant text-white px-2 py-0.5 font-label text-[8px] uppercase tracking-widest">
+                Ảnh Hover
               </div>
             )}
           </div>

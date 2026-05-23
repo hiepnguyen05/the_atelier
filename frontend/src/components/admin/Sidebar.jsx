@@ -6,7 +6,6 @@ const navItems = [
   { name: 'Tổng quan', icon: 'dashboard', path: '/admin/dashboard' },
   { name: 'Sản phẩm', icon: 'straighten', path: '/admin/products' },
   { name: 'Danh mục', icon: 'category', path: '/admin/categories' },
-  { name: 'Bộ sưu tập', icon: 'auto_awesome_motion', path: '/admin/collections' },
   { name: 'Đơn hàng', icon: 'shopping_bag', path: '/admin/orders' },
   { name: 'Khách hàng', icon: 'group', path: '/admin/customers' },
   { name: 'Thống kê', icon: 'analytics', path: '/admin/analytics' },

@@ -1,4 +1,5 @@
 import React from 'react';
+import Loading from '../common/Loading';
 
 const CategoryRow = ({ category, onEdit, onDelete, onViewSub }) => (
   <tr className="group hover:bg-surface-container-low/50 transition-colors">
@@ -62,8 +63,8 @@ const CategoryTable = ({ categories, loading, onEdit, onDelete, onViewSub }) => 
           <tbody className="divide-y divide-outline-variant/10">
             {loading ? (
               <tr>
-                <td colSpan="6" className="py-12 text-center font-body text-xs text-on-surface-variant opacity-60 uppercase tracking-widest">
-                  Đang tải dữ liệu...
+                <td colSpan="6" className="py-12">
+                  <Loading size={70} text="Đang tải dữ liệu..." />
                 </td>
               </tr>
             ) : categories.length === 0 ? (

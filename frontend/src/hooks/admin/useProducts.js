@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { productService } from '../services';
+import { productService } from '../../services';
 
 export const useProducts = (initialParams = {}) => {
   const [products, setProducts] = useState([]);
