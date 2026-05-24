@@ -66,6 +66,19 @@ const productSchema = Joi.object({
     .optional(),
 }).options({ allowUnknown: true });
 
+const productQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(12),
+  categoryId: Joi.number().integer().allow(null, ""),
+  productType: Joi.string().valid(...PRODUCT_TYPES, "").allow(null, ""),
+  gender: Joi.string().valid(...GENDERS, "").allow(null, ""),
+  brandId: Joi.number().integer().allow(null, ""),
+  status: Joi.string().valid("active", "inactive", "archived", "all").allow(null, ""),
+  search: Joi.string().max(100).allow(null, ""),
+  sort: Joi.string().valid("newest", "oldest", "price_asc", "price_desc", "name_asc").default("newest"),
+}).options({ allowUnknown: true });
+
 module.exports = {
   productSchema,
+  productQuerySchema,
 };

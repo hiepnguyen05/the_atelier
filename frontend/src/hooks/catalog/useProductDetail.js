@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../../services';
 import { useToast } from '../../contexts/ToastContext';
+import { useCart } from '../../contexts/CartContext';
 import { getProductTypeConfig } from '../../constants/productTypes';
 
 export const useProductDetail = (slug) => {
   const { showToast } = useToast();
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -143,19 +145,58 @@ export const useProductDetail = (slug) => {
         setProduct(productData);
 
         // Initialize selections
-        const uniqueSizes = Array.from(new Set(productData.productVariants?.map(v => v.sizeName).filter(Boolean) || []));
-        const uniqueColors = Array.from(new Set(productData.productVariants?.map(v => v.colorName).filter(Boolean) || []));
+        const rawSizes = Array.from(new Set(productData.productVariants?.map(v => v.sizeName?.trim()).filter(Boolean) || []));
+        const uniqueSizes = rawSizes.filter(s => {
+          const isOS = s.toUpperCase() === 'OS' || s.toLowerCase() === 'one size';
+          return !(isOS && rawSizes.length > 1);
+        });
+
+        // Sort uniqueSizes
+        const typeConfig = getProductTypeConfig(productData.productType);
+        const suggested = typeConfig?.variantConfig?.suggestedSizes || [];
+        uniqueSizes.sort((a, b) => {
+          const indexA = suggested.indexOf(a);
+          const indexB = suggested.indexOf(b);
+          if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+
+        const productImagesList = productData.productImages || [];
+        const primaryImg = productImagesList.find(img => img.isPrimary === true || img.isPrimary === 1 || img.isPrimary === '1') || productImagesList[0];
+        const primaryImgUrl = primaryImg ? primaryImg.imageUrl : '';
+
+        const uniqueColorsMap = {};
+        productData.productVariants?.forEach(v => {
+          const name = v.colorName?.trim();
+          if (name && !uniqueColorsMap[name]) {
+            uniqueColorsMap[name] = {
+              name,
+              code: v.colorCode || '#ffffff',
+              image: v.colorImage || (name === 'Màu tiêu chuẩn' ? primaryImgUrl : '')
+            };
+          }
+        });
+        const uniqueColors = Object.values(uniqueColorsMap).sort((a, b) => {
+          if (a.name === 'Màu tiêu chuẩn') return -1;
+          if (b.name === 'Màu tiêu chuẩn') return 1;
+          return a.name.localeCompare(b.name);
+        });
+
         if (uniqueSizes.length > 0) {
           setSelectedSize(uniqueSizes[0]);
         } else {
           const isApparelOrShoes = ['clothing_top', 'clothing_bottom', 'shoes', 'slippers'].includes(productData.productType);
           if (isApparelOrShoes) {
-            const typeConfig = getProductTypeConfig(productData.productType);
-            const suggested = typeConfig.variantConfig?.suggestedSizes || [];
-            if (suggested.length > 0) setSelectedSize(suggested[0]);
+            const suggestedSuggested = typeConfig?.variantConfig?.suggestedSizes || [];
+            if (suggestedSuggested.length > 0) setSelectedSize(suggestedSuggested[0]);
           }
         }
-        if (uniqueColors.length > 0) setSelectedColor(uniqueColors[0]);
+        if (uniqueColors.length > 0) {
+          const standardColor = uniqueColors.find(c => c.name === 'Màu tiêu chuẩn');
+          setSelectedColor(standardColor ? standardColor.name : uniqueColors[0].name);
+        }
 
         // 2. Fetch recommendations of the same product type (excluding current product)
         const sameTypeRes = await productService.getAll({ 
@@ -212,9 +253,23 @@ export const useProductDetail = (slug) => {
   };
 
   const images = product?.productImages || [];
-  const primaryImage = images.find(img => img.isPrimary === true || img.isPrimary === 1 || img.isPrimary === '1') || images[0];
-  const otherImages = images.filter(img => img.imageId !== primaryImage?.imageId);
-  const orderedImages = primaryImage ? [primaryImage, ...otherImages] : images;
+  const activeColorVariant = product?.productVariants?.find(v => v.colorName?.trim() === selectedColor?.trim() && v.colorImage);
+  const colorImageUrl = activeColorVariant ? activeColorVariant.colorImage : null;
+
+  let finalImages = [...images];
+  if (colorImageUrl) {
+    const existsIdx = finalImages.findIndex(img => img.imageUrl === colorImageUrl);
+    if (existsIdx !== -1) {
+      const [ex] = finalImages.splice(existsIdx, 1);
+      finalImages = [ex, ...finalImages];
+    } else {
+      finalImages = [{ imageUrl: colorImageUrl, isPrimary: true, imageId: 'color-img-temp' }, ...finalImages];
+    }
+  }
+
+  const primaryImage = finalImages.find(img => img.isPrimary === true || img.isPrimary === 1 || img.isPrimary === '1') || finalImages[0];
+  const otherImages = finalImages.filter(img => img.imageUrl !== primaryImage?.imageUrl);
+  const orderedImages = primaryImage ? [primaryImage, ...otherImages] : finalImages;
 
   const productCategory = product?.category || null;
   const productTypeConfig = product ? getProductTypeConfig(product.productType || 'clothing_top') : null;
@@ -223,24 +278,72 @@ export const useProductDetail = (slug) => {
   const sizeLabel = parsedConfig?.sizeLabel;
   const colorLabel = parsedConfig?.colorLabel;
 
-  const uniqueSizes = Array.from(new Set(product?.productVariants?.map(v => v.sizeName?.trim()).filter(Boolean) || []));
-  const uniqueColors = Array.from(new Set(product?.productVariants?.map(v => v.colorName?.trim()).filter(Boolean) || []));
+  const rawSizes = Array.from(new Set(product?.productVariants?.map(v => v.sizeName?.trim()).filter(Boolean) || []));
+  const uniqueSizes = rawSizes.filter(s => {
+    const isOS = s.toUpperCase() === 'OS' || s.toLowerCase() === 'one size';
+    return !(isOS && rawSizes.length > 1);
+  });
+
+  const primaryImg = images.find(img => img.isPrimary === true || img.isPrimary === 1 || img.isPrimary === '1') || images[0];
+  const primaryImgUrl = primaryImg ? primaryImg.imageUrl : '';
+
+  const uniqueColorsMap = {};
+  product?.productVariants?.forEach(v => {
+    const name = v.colorName?.trim();
+    if (name && !uniqueColorsMap[name]) {
+      uniqueColorsMap[name] = {
+        name,
+        code: v.colorCode || '#ffffff',
+        image: v.colorImage || (name === 'Màu tiêu chuẩn' ? primaryImgUrl : '')
+      };
+    }
+  });
+  const uniqueColors = Object.values(uniqueColorsMap).sort((a, b) => {
+    if (a.name === 'Màu tiêu chuẩn') return -1;
+    if (b.name === 'Màu tiêu chuẩn') return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   const isApparelOrShoes = product ? ['clothing_top', 'clothing_bottom', 'shoes', 'slippers'].includes(product.productType) : false;
-  const sizesToDisplay = uniqueSizes.length > 0 
-    ? uniqueSizes 
+  
+  // Sort sizes according to suggestedSizes order
+  const suggested = productTypeConfig?.variantConfig?.suggestedSizes || [];
+  const sortedSizes = [...uniqueSizes].sort((a, b) => {
+    const indexA = suggested.indexOf(a);
+    const indexB = suggested.indexOf(b);
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
+  const sizesToDisplay = sortedSizes.length > 0 
+    ? sortedSizes 
     : (isApparelOrShoes && productTypeConfig ? productTypeConfig.variantConfig.suggestedSizes : []);
 
   const specifications = product?.specifications || {};
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     if (sizeLabel && sizesToDisplay.length > 0 && !selectedSize) {
       showToast(`Vui lòng chọn ${sizeLabel.toLowerCase()} sản phẩm`);
       return;
     }
-    const spec = [selectedColor, selectedSize].filter(Boolean).join(' / ');
-    showToast(`Đã thêm ${product.name} ${spec ? `(${spec})` : ''} vào túi xách thành công!`);
+    
+    // Tìm variant khớp với màu sắc và kích thước được chọn
+    const matchingVariant = product.productVariants?.find(v => 
+      (v.colorName?.trim() || '').toLowerCase() === (selectedColor?.trim() || '').toLowerCase() &&
+      (v.sizeName?.trim() || '').toLowerCase() === (selectedSize?.trim() || '').toLowerCase()
+    );
+
+    const variant = matchingVariant || product.productVariants?.[0];
+
+    if (!variant) {
+      showToast('Sản phẩm tạm thời hết hàng hoặc không có biến thể khả dụng', 'error');
+      return;
+    }
+
+    await addToCart(variant.variantId, 1);
   };
 
   return {

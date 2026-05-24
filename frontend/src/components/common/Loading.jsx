@@ -42,7 +42,7 @@ const Loading = ({
           <ellipse cx="50" cy="15" rx="1.5" ry="3" fill="none" stroke="currentColor" strokeWidth="0.75" />
         </g>
         {/* Flowing Thread */}
-        <path class="thread" d="M30 50C40 40 60 60 70 50" stroke="currentColor" strokeWidth="0.75" fill="none" />
+        <path className="thread" d="M30 50C40 40 60 60 70 50" stroke="currentColor" strokeWidth="0.75" fill="none" />
         {text && (
           <text 
             x="50" 

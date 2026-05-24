@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAdmin, logout } = useAuth();
+  const { cartCount } = useCart();
 
   const getUserLink = () => {
     if (!user) return "/login";
@@ -55,9 +57,15 @@ const Header = () => {
             />
           </div>
           
-          <Link to="/" className="text-on-surface hover:text-secondary transition-colors">
+          <Link to="/cart" className="text-on-surface hover:text-secondary transition-colors relative flex items-center">
             <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 text-[9px] bg-secondary text-white w-4 h-4 flex items-center justify-center rounded-full font-label font-bold">
+                {cartCount}
+              </span>
+            )}
           </Link>
+
           
           <Link to={getUserLink()} className="text-on-surface hover:text-secondary transition-colors">
             <span className="material-symbols-outlined text-[20px]" title={user ? "Tài khoản" : "Đăng nhập"}>person</span>

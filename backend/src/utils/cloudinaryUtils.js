@@ -11,6 +11,9 @@ const uploadImage = async (file, folder = "the-atelier") => {
     const result = await cloudinary.uploader.upload(file, {
       folder: folder,
       upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
+      transformation: [
+        { quality: "auto", fetch_format: "auto" }
+      ]
     });
     return {
       url: result.secure_url,

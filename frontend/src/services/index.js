@@ -4,3 +4,5 @@ export { categoryService } from './categoryService';
 export { brandService } from './brandService';
 export { authService } from './authService';
 export { userService } from './userService';
+export { cartService } from './cartService';
+

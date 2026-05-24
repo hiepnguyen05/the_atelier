@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../contexts/CartContext';
 
 const ProductCard = ({ product, getProductImage, formatPrice, showToast }) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [bgColor, setBgColor] = useState('#ffffff'); // Default card background
   const images = product.productImages || [];
   const primaryImg = images.find(img => img.isPrimary === true || img.isPrimary === 1 || img.isPrimary === '1') || images[0];
@@ -24,7 +26,7 @@ const ProductCard = ({ product, getProductImage, formatPrice, showToast }) => {
         const canvas = document.createElement('canvas');
         canvas.width = 10;
         canvas.height = 10;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
         ctx.drawImage(img, 0, 0, 10, 10);
@@ -76,9 +78,14 @@ const ProductCard = ({ product, getProductImage, formatPrice, showToast }) => {
           />
         )}
         <button 
-          onClick={(e) => {
+          onClick={async (e) => {
             e.stopPropagation();
-            showToast(`Đã thêm ${product.name} vào túi xách`);
+            const firstVariant = product.productVariants?.[0];
+            if (!firstVariant) {
+              showToast('Sản phẩm tạm thời không có biến thể sẵn có', 'error');
+              return;
+            }
+            await addToCart(firstVariant.variantId, 1);
           }}
           className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-on-background text-on-primary hover:bg-secondary p-2 rounded-none border-none flex items-center justify-center shadow-md duration-300"
         >

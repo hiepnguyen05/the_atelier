@@ -18,8 +18,8 @@ const ProductInfo = ({
   specifications,
 }) => {
   return (
-    <div className="lg:col-span-5">
-      <div className="lg:sticky lg:top-28 space-y-10 pb-12">
+    <div className="lg:col-span-5 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto no-scrollbar w-full lg:pl-6">
+      <div className="space-y-10 pb-12 pr-1">
         
         {/* Product Info */}
         <div className="space-y-4">
@@ -43,26 +43,44 @@ const ProductInfo = ({
         {/* Selectors */}
         <div className="space-y-8 pt-2">
           {/* Color Selection if any */}
-          {colorLabel && uniqueColors.length > 0 && (
+          {colorLabel && uniqueColors.length > 1 && (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="font-label text-[9px] tracking-widest text-on-surface/50 uppercase">Màu sắc</span>
+                <span className="font-label text-[9px] tracking-widest text-on-surface/50 uppercase">{colorLabel}</span>
                 <span className="font-label text-xs uppercase tracking-wider text-on-surface font-semibold">{selectedColor}</span>
               </div>
-              <div className="flex flex-wrap gap-6 pt-1">
-                {uniqueColors.map(color => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`py-1 text-xs font-label uppercase tracking-widest transition-all duration-300 relative ${
-                      selectedColor === color 
-                        ? 'text-on-surface font-semibold border-b border-on-surface' 
-                        : 'text-on-surface-variant/40 hover:text-on-surface'
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-4 pt-2">
+                {uniqueColors.map(color => {
+                  const isSelected = selectedColor === color.name;
+                  return (
+                    <button
+                      key={color.name}
+                      type="button"
+                      onClick={() => setSelectedColor(color.name)}
+                      className={`relative p-0 bg-transparent border-none outline-none transition-all duration-300 ${
+                        isSelected 
+                          ? 'ring-1 ring-on-surface ring-offset-2 scale-105 z-10' 
+                          : 'opacity-70 hover:opacity-100 hover:scale-105'
+                      }`}
+                      title={color.name}
+                    >
+                      {color.image ? (
+                        <div className="w-11 h-14 bg-surface-container overflow-hidden border border-outline-variant/10">
+                          <img 
+                            src={color.image} 
+                            alt={color.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div 
+                          className="w-7 h-7 rounded-full border border-outline-variant/30" 
+                          style={{ backgroundColor: color.code }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

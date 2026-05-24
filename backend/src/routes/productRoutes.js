@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
 const validate = require("../middlewares/validate");
-const { productSchema } = require("../validations/productValidation");
+const { productSchema, productQuerySchema } = require("../validations/productValidation");
 
 const { protect, authorize } = require("../middlewares/authMiddleware");
 
-router.get("/", productController.getProducts);
+router.get("/", validate(productQuerySchema, 'query'), productController.getProducts);
 router.get("/:slug", productController.getProductBySlug);
 
 // Admin only routes

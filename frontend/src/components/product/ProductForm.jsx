@@ -5,7 +5,58 @@ import { useToast } from '../../contexts/ToastContext';
 import { useProductForm } from '../../hooks/admin/useProductForm';
 import BrandPicker from '../brand/BrandPicker';
 import ImageUploadManager from './ImageUploadManager';
-import VariantManager from './VariantManager';
+import ColorManager from './ColorManager';
+import InventoryManager from './InventoryManager';
+
+const getColorsFromVariants = (variants) => {
+  const colorMap = {};
+  variants.forEach(v => {
+    const key = v.colorName || 'Màu tiêu chuẩn';
+    if (!colorMap[key]) {
+      colorMap[key] = {
+        colorName: v.colorName || 'Màu tiêu chuẩn',
+        colorCode: v.colorCode || '#ffffff',
+        colorImage: v.colorImage || ''
+      };
+    }
+  });
+  return Object.values(colorMap);
+};
+
+const generateVariants = (colorsList, sizesList, existingVariants = [], skuBase = '') => {
+  const newVariants = [];
+  const existingMap = new Map();
+  existingVariants.forEach(v => {
+    const key = `${v.colorName || 'Màu tiêu chuẩn'}-${v.sizeName || ''}`;
+    existingMap.set(key, v);
+  });
+
+  const finalSizes = sizesList.length > 0 ? sizesList : [''];
+
+  colorsList.forEach((color, cIdx) => {
+    finalSizes.forEach((size, sIdx) => {
+      const colorName = color.colorName || 'Màu tiêu chuẩn';
+      const key = `${colorName}-${size}`;
+      const existing = existingMap.get(key);
+
+      const skuSuffix = size ? `-${size}` : '';
+      const defaultSku = `${skuBase}-${cIdx + 1}${skuSuffix}`;
+
+      newVariants.push({
+        variantId: existing?.variantId || undefined,
+        skuVariant: existing?.skuVariant || defaultSku,
+        sizeName: size,
+        colorName: colorName,
+        colorCode: color.colorCode || '#ffffff',
+        colorImage: color.colorImage || '',
+        stockQuantity: existing?.stockQuantity !== undefined ? existing.stockQuantity : 0,
+        priceAdjustment: existing?.priceAdjustment !== undefined ? existing.priceAdjustment : 0
+      });
+    });
+  });
+
+  return newVariants;
+};
 
 const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
   const { showToast } = useToast();
@@ -19,6 +70,62 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
 
   const productTypeConfig = getProductTypeConfig(formData.productType);
   const typeOptions = getProductTypeOptions();
+
+  const [colors, setColors] = React.useState([]);
+  const [enabledSizes, setEnabledSizes] = React.useState([]);
+  const [hasSizes, setHasSizes] = React.useState(true);
+
+  // Initialize colors, enabledSizes and hasSizes when form opens or initialData changes
+  React.useEffect(() => {
+    if (isOpen) {
+      const initialColors = getColorsFromVariants(initialData?.productVariants || []);
+      if (initialColors.length === 0) {
+        initialColors.push({ colorName: 'Màu tiêu chuẩn', colorCode: '#ffffff', colorImage: '' });
+      }
+      setColors(initialColors);
+
+      const suggested = productTypeConfig.variantConfig?.suggestedSizes || [];
+      let existingSizes = initialData?.productVariants?.map(v => v.sizeName).filter(Boolean) || [];
+      
+      if (suggested.length > 0) {
+        existingSizes = existingSizes.filter(s => s.toUpperCase() !== 'OS' && s.toLowerCase() !== 'one size');
+      }
+      
+      setEnabledSizes(Array.from(new Set([...suggested, ...existingSizes])));
+
+      const hasAnySize = initialData?.productVariants?.some(v => v.sizeName && v.sizeName !== '' && v.sizeName.toUpperCase() !== 'OS') || false;
+      if (initialData) {
+        setHasSizes(hasAnySize);
+      } else {
+        setHasSizes(suggested.length > 0);
+      }
+    }
+  }, [isOpen, initialData, formData.productType]);
+
+  // Keep variants in sync with colors, productType (suggestedSizes), enabledSizes, hasSizes, and skuBase
+  React.useEffect(() => {
+    if (isOpen && colors.length > 0) {
+      const suggested = productTypeConfig.variantConfig?.suggestedSizes || [];
+      const sizesList = (hasSizes && suggested.length > 0) ? (enabledSizes.length > 0 ? enabledSizes : ['']) : [''];
+      
+      const newVariants = generateVariants(colors, sizesList, formData.variants, formData.skuBase);
+      
+      const hasChanged = JSON.stringify(newVariants) !== JSON.stringify(formData.variants);
+      if (hasChanged) {
+        updateFormData({ variants: newVariants });
+      }
+    }
+  }, [colors, enabledSizes, hasSizes, formData.productType, formData.skuBase, isOpen]);
+
+  // Auto-calculate total stock from variants
+  React.useEffect(() => {
+    if (formData.variants && formData.variants.length > 0) {
+      const totalStock = formData.variants.reduce((sum, v) => sum + (parseInt(v.stockQuantity) || 0), 0);
+      if (formData.stock !== totalStock) {
+        updateFormData({ stock: totalStock });
+      }
+    }
+  }, [formData.variants]);
 
   // Helper to render nested categories as interactive checkboxes
   const renderCategoryCheckboxes = (cats, level = 0) => {
@@ -229,26 +336,46 @@ const ProductForm = ({ isOpen, onClose, onSave, initialData }) => {
             </div>
           </section>
 
-          {/* Section 3: Biến thể */}
+          {/* Section 3: Màu sắc & Hình ảnh */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12">
             <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-8">
-              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">03. Biến thể & Tồn kho</h4>
-              <p className="font-body text-xs text-on-surface-variant opacity-60">Biến thể được điều chỉnh theo loại: <strong className="text-secondary">{productTypeConfig.label}</strong></p>
+              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">03. Màu sắc & Hình ảnh</h4>
+              <p className="font-body text-xs text-on-surface-variant opacity-60">Tải lên hình ảnh đại diện và mã màu sắc riêng biệt</p>
             </div>
             <div className="md:col-span-12">
-              <VariantManager 
-                variants={formData.variants} 
-                skuBase={formData.skuBase}
-                attributeConfig={productTypeConfig.variantConfig}
-                onChange={(newVariants) => updateFormData({ variants: newVariants })} 
+              <ColorManager 
+                colors={colors}
+                onChange={setColors}
               />
             </div>
           </section>
 
-          {/* Section 4: Chi tiết */}
+          {/* Section 4: Kích cỡ & Tồn kho */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12">
+            <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-8">
+              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">04. Kích cỡ & Tồn kho</h4>
+              <p className="font-body text-xs text-on-surface-variant opacity-60">Tồn kho chi tiết cho từng kích cỡ mặc định của mỗi màu</p>
+            </div>
+            <div className="md:col-span-12">
+              <InventoryManager 
+                colors={colors}
+                suggestedSizes={productTypeConfig.variantConfig?.suggestedSizes || []}
+                sizeLabel={productTypeConfig.variantConfig?.sizeLabel || 'Kích cỡ'}
+                variants={formData.variants}
+                skuBase={formData.skuBase}
+                onChange={(newVariants) => updateFormData({ variants: newVariants })}
+                enabledSizes={enabledSizes}
+                setEnabledSizes={setEnabledSizes}
+                hasSizes={hasSizes}
+                setHasSizes={setHasSizes}
+              />
+            </div>
+          </section>
+
+          {/* Section 5: Chi tiết */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-x-12 gap-y-10">
             <div className="md:col-span-12 border-l-4 border-secondary pl-6 mb-4">
-              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">04. Chất liệu & Thông số</h4>
+              <h4 className="font-headline text-xl text-on-surface uppercase tracking-tight">05. Chất liệu & Thông số</h4>
               <p className="font-body text-xs text-on-surface-variant opacity-60">Cấu hình thông số kỹ thuật đặc thù cho <strong className="text-secondary">{productTypeConfig.label}</strong></p>
             </div>
 

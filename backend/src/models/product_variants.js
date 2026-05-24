@@ -30,7 +30,12 @@ module.exports = function(sequelize, DataTypes) {
     },
     colorCode: {
       field: 'color_code',
-      type: DataTypes.STRING(7),
+      type: DataTypes.STRING(30),
+      allowNull: true
+    },
+    colorImage: {
+      field: 'color_image',
+      type: DataTypes.STRING(255),
       allowNull: true
     },
     sizeName: {

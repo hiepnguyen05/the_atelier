@@ -30,7 +30,7 @@ const getProducts = async (query) => {
 
   if (categoryId) {
     whereClause.productId = {
-      [Op.in]: sequelize.literal(`(SELECT product_id FROM product_categories WHERE category_id = ${parseInt(categoryId)})`)
+      [Op.in]: sequelize.literal(`(SELECT product_id FROM product_categories WHERE category_id = ${sequelize.escape(parseInt(categoryId))})`)
     };
   }
   if (productType) whereClause.productType = productType;
