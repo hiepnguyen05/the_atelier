@@ -57,6 +57,12 @@ module.exports = function(sequelize, DataTypes) {
         key: 'address_id'
       }
     },
+    paymentMethod: {
+      field: 'payment_method',
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: "COD"
+    },
     status: {
       type: DataTypes.ENUM('pending','processing','shipped','completed','cancelled'),
       allowNull: true,

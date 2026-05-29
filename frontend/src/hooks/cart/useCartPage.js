@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { productService } from '../../services';
@@ -116,12 +117,14 @@ export const useCartPage = () => {
   const estimatedTax = subtotal * 0.08; // 8% VAT
   const total = subtotal + estimatedTax;
 
+  const navigate = useNavigate();
+
   const handleCheckout = () => {
     if (selectedItemIds.length === 0) {
       showToast('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán', 'error');
       return;
     }
-    showToast('Tính năng thanh toán đang được phát triển', 'success');
+    navigate('/checkout', { state: { selectedItemIds } });
   };
 
   return {

@@ -7,6 +7,7 @@ import ProductDetail from './pages/ProductDetail'
 import CategoryList from './pages/admin/CategoryList'
 import ProductList from './pages/admin/ProductList'
 import CustomerList from './pages/admin/CustomerList'
+import OrderList from './pages/admin/OrderList'
 import Dashboard from './pages/admin/Dashboard'
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -16,6 +17,10 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLogin from './pages/admin/AdminLogin';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
+import OrderTracking from './pages/OrderTracking';
+import OrderHistory from './pages/OrderHistory';
 
 function App() {
   return (
@@ -65,6 +70,46 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
+                <Route path="/checkout" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <Checkout />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/checkout/success" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <OrderSuccess />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/orders/:id" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <OrderTracking />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <OrderHistory />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+                
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -98,6 +143,11 @@ function App() {
                 <Route path="/admin/customers" element={
                   <ProtectedRoute requiredRole="admin">
                     <CustomerList />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/orders" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <OrderList />
                   </ProtectedRoute>
                 } />
               </Routes>

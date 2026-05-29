@@ -29,7 +29,8 @@ apiConfig.interceptors.response.use(
     // Ví dụ: Tự động logout nếu token hết hạn (401)
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      // window.location.href = '/login';
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

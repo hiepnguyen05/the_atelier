@@ -11,7 +11,7 @@ const Header = () => {
   const getUserLink = () => {
     if (!user) return "/login";
     if (isAdmin) return "/admin/dashboard";
-    return "/"; // Or profile page
+    return "/orders";
   };
 
   return (
@@ -67,19 +67,78 @@ const Header = () => {
           </Link>
 
           
-          <Link to={getUserLink()} className="text-on-surface hover:text-secondary transition-colors">
-            <span className="material-symbols-outlined text-[20px]" title={user ? "Tài khoản" : "Đăng nhập"}>person</span>
-          </Link>
-          
-          {user && (
-            <button 
-              onClick={logout} 
-              className="text-on-surface hover:text-error transition-colors bg-transparent border-0 p-0 ml-1 md:ml-2"
-              title="Đăng xuất"
-            >
-              <span className="material-symbols-outlined text-[20px]">logout</span>
-            </button>
-          )}
+          {/* Account Icon with Hover Dropdown */}
+          <div className="relative group flex items-center h-full">
+            <Link to={getUserLink()} className="text-on-surface hover:text-secondary transition-colors flex items-center py-2">
+              <span className="material-symbols-outlined text-[20px]">person</span>
+            </Link>
+            
+            {/* Hover Dropdown */}
+            <div className="absolute right-0 top-full mt-0 pt-4 w-60 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50">
+              <div className="bg-white border border-neutral-900/[0.06] shadow-[0_15px_40px_rgba(0,0,0,0.06)] p-6 space-y-4">
+                {user ? (
+                  <>
+                    <div className="pb-3 border-b border-neutral-900/[0.05]">
+                      <p className="font-sans text-[10px] text-neutral-400 tracking-wider uppercase mb-1">Tài khoản</p>
+                      <p className="font-serif text-sm text-neutral-800 italic truncate font-medium">
+                        {user.name || user.email}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-3 pt-1">
+                      {isAdmin && (
+                        <Link 
+                          to="/admin/dashboard" 
+                          className="flex items-center gap-2 font-label text-[9px] tracking-[0.2em] text-neutral-600 hover:text-neutral-950 transition-colors uppercase"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">dashboard</span>
+                          Quản lý Admin
+                        </Link>
+                      )}
+                      
+                      <Link 
+                        to="/orders" 
+                        className="flex items-center gap-2 font-label text-[9px] tracking-[0.2em] text-neutral-600 hover:text-neutral-950 transition-colors uppercase"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                        Lịch sử mua hàng
+                      </Link>
+                      
+                      <button 
+                        onClick={logout} 
+                        className="w-full flex items-center gap-2 font-label text-[9px] tracking-[0.2em] text-rose-600 hover:text-rose-800 transition-colors bg-transparent border-0 p-0 text-left uppercase"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">logout</span>
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="pb-2 border-b border-neutral-900/[0.05]">
+                      <p className="font-serif text-xs text-neutral-500 italic">Chào mừng quý khách đến với The Atelier.</p>
+                    </div>
+                    <div className="space-y-3 pt-2">
+                      <Link 
+                        to="/login" 
+                        className="flex items-center gap-2 font-label text-[9px] tracking-[0.2em] text-neutral-600 hover:text-neutral-950 transition-colors uppercase"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">login</span>
+                        Đăng nhập
+                      </Link>
+                      <Link 
+                        to="/register" 
+                        className="flex items-center gap-2 font-label text-[9px] tracking-[0.2em] text-neutral-600 hover:text-neutral-950 transition-colors uppercase"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">person_add</span>
+                        Đăng ký tài khoản
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
