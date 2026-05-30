@@ -13,6 +13,22 @@ const OrderTracking = () => {
     getProductImage
   } = useOrderTracking();
 
+  const getHeaderTitle = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'Đơn hàng đã được giao thành công.';
+      case 'cancelled':
+        return 'Đơn hàng này đã bị hủy.';
+      case 'shipped':
+        return 'Đơn hàng của bạn đang trên đường tới.';
+      case 'processing':
+        return 'Đơn hàng đã xác nhận và đang được chế tác.';
+      case 'pending':
+      default:
+        return 'Đơn hàng mới đặt, đang chờ xác nhận.';
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-background text-on-surface selection:bg-secondary-fixed min-h-[70vh] flex items-center justify-center">
@@ -29,17 +45,17 @@ const OrderTracking = () => {
 
   return (
     <div className="bg-background text-on-surface selection:bg-secondary-fixed">
-      <main className="pt-44 pb-32 px-6 md:px-16 max-w-screen-2xl mx-auto">
+      <main className="pt-32 md:pt-44 pb-20 md:pb-32 px-4 md:px-16 max-w-screen-2xl mx-auto">
         
         {/* Header Section */}
-        <header className="mb-24">
+        <header className="mb-10 md:mb-24">
           <p className="font-label text-[10px] tracking-[0.3em] text-secondary mb-6 uppercase opacity-80">Theo dõi đơn hàng</p>
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-on-surface leading-[1.1] max-w-4xl">
-            {order.status === 'completed' ? 'Đơn hàng đã được giao thành công.' : 'Đơn hàng của bạn đang trên đường tới.'}
+            {getHeaderTitle(order.status)}
           </h1>
         </header>
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-start">
           
           {/* Left: Tracking & Info */}
           <div className="lg:col-span-7">

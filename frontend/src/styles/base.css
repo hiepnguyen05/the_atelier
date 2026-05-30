@@ -3,6 +3,7 @@ body {
   background-color: var(--color-background); 
   color: var(--color-on-surface); 
   margin: 0; 
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -10,9 +11,57 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-headline);
   font-weight: 300;
+  line-height: 1.25;
+}
+
+/* Force all italic texts to be normal/upright as requested to unify typography styles */
+.italic,
+[style*="font-style: italic"],
+[fontStyle="italic"],
+em,
+i {
+  font-style: normal !important;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-surface-container); }
 ::-webkit-scrollbar-thumb { background: var(--color-outline-variant); }
+
+/* Premium Global Responsive Optimizations */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+p, span, h1, h2, h3, h4, h5, h6, a, button, input, textarea {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Hide Scrollbar for specific sections */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile responsive padding and layout optimizations */
+@media (max-width: 640px) {
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .section, section {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+}

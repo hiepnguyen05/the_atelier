@@ -3,6 +3,10 @@
   font-family: var(--font-headline); 
 }
 
+.font-sans {
+  font-family: var(--font-body);
+}
+
 .font-label {
   font-family: var(--font-label);
   font-size: 10px;

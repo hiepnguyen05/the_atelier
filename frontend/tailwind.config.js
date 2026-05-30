@@ -70,7 +70,9 @@ export default {
           "headline": ["Newsreader", "serif"],
           "display": ["Newsreader", "serif"],
           "body": ["Manrope", "sans-serif"],
-          "label": ["Manrope", "sans-serif"]
+          "label": ["Manrope", "sans-serif"],
+          "sans": ["Manrope", "sans-serif"],
+          "serif": ["Newsreader", "serif"]
       }
     },
   },

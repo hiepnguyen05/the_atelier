@@ -49,7 +49,7 @@ const Cart = () => {
         {cartItems.length === 0 ? (
           <CartEmptyState />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20">
             {/* Items Section */}
             <section className="lg:col-span-8">
               {/* Select All Bar */}

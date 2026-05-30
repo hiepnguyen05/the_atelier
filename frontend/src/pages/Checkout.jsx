@@ -18,7 +18,7 @@ const Checkout = () => {
   return (
     <div className="bg-surface text-on-surface antialiased">
       <main className="pt-32 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto min-h-[70vh]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
           <CheckoutForm 
             formData={formData} 
             handleInputChange={handleInputChange} 

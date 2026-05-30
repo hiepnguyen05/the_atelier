@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Header from './components/layout/Header'
+import ScrollToTop from './components/common/ScrollToTop';
+import Header from './components/layout/Header';
 import Footer from './components/layout/Footer'
 import Home from './pages/Home'
 import ProductCatalog from './pages/ProductCatalog'
@@ -21,6 +22,8 @@ import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import OrderTracking from './pages/OrderTracking';
 import OrderHistory from './pages/OrderHistory';
+import MoMoReturn from './pages/MoMoReturn';
+import VNPayReturn from './pages/VNPayReturn';
 
 function App() {
   return (
@@ -28,6 +31,7 @@ function App() {
       <ToastProvider>
         <CartProvider>
           <Router>
+            <ScrollToTop />
             <div className="app">
               <Routes>
                 <Route path="/" element={
@@ -105,6 +109,26 @@ function App() {
                     <>
                       <Header />
                       <OrderHistory />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/payment/momo-return" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <MoMoReturn />
+                      <Footer />
+                    </>
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/payment/vnpay-return" element={
+                  <ProtectedRoute>
+                    <>
+                      <Header />
+                      <VNPayReturn />
                       <Footer />
                     </>
                   </ProtectedRoute>

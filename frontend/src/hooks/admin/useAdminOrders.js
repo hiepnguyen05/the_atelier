@@ -12,6 +12,10 @@ export const useAdminOrders = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [counts, setCounts] = useState({
+    pending: 0,
+    refund_pending: 0
+  });
   
   const [params, setParams] = useState({
     page: 1,
@@ -42,6 +46,30 @@ export const useAdminOrders = () => {
           totalPages: response.data.totalPages || 1,
           currentPage: response.data.currentPage || 1
         });
+      }
+
+      // Fetch pending and refund_pending counts in background
+      try {
+        const [pendingRes, refundRes] = await Promise.all([
+          orderService.getAllOrdersAdmin({ limit: 100, status: 'pending' }),
+          orderService.getAllOrdersAdmin({ limit: 100, status: 'refund_pending' })
+        ]);
+
+        const pendingOrders = pendingRes.data?.orders || [];
+        const refundOrders = refundRes.data?.orders || [];
+
+        // Get viewed order IDs from localStorage
+        const viewedIds = JSON.parse(localStorage.getItem('admin_viewed_order_ids') || '[]');
+
+        const unseenPendingCount = pendingOrders.filter(o => !viewedIds.includes(o.orderId)).length;
+        const unseenRefundCount = refundOrders.filter(o => !viewedIds.includes(o.orderId)).length;
+
+        setCounts({
+          pending: unseenPendingCount,
+          refund_pending: unseenRefundCount
+        });
+      } catch (countErr) {
+        console.error('Error fetching background counts:', countErr);
       }
     } catch (err) {
       console.error('Error fetching admin orders:', err);
@@ -75,6 +103,19 @@ export const useAdminOrders = () => {
     }
   };
 
+  const approveRefund = async (orderId) => {
+    try {
+      await orderService.approveRefund(orderId);
+      showToast('Đã duyệt hoàn tiền thành công', 'success');
+      await fetchOrders();
+      return true;
+    } catch (err) {
+      console.error('Error approving refund:', err);
+      showToast(err.response?.data?.message || 'Không thể duyệt hoàn tiền', 'error');
+      return false;
+    }
+  };
+
   return {
     orders,
     pagination,
@@ -83,6 +124,8 @@ export const useAdminOrders = () => {
     params,
     setParams,
     updateStatus,
-    refreshOrders: fetchOrders
+    approveRefund,
+    refreshOrders: fetchOrders,
+    counts
   };
 };

@@ -10,7 +10,7 @@ const OrderInfo = ({ order, formatDate }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 border-t border-black/[0.03] pt-16">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 border-t border-black/[0.03] pt-10 md:pt-16">
       <div className="space-y-8">
         <div>
           <h3 className="font-label text-[10px] tracking-[0.25em] text-on-surface-variant uppercase mb-6 opacity-60">Thông tin vận chuyển</h3>

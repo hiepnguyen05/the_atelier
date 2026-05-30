@@ -2,7 +2,7 @@ import React from 'react';
 
 const CartSummary = ({ subtotal, estimatedTax, total, formatPrice, handleCheckout }) => {
   return (
-    <div className="bg-surface-container p-8 sticky top-32">
+    <div className="bg-surface-container p-6 sm:p-8 sticky top-32">
       <h2 className="font-headline italic text-3xl mb-8">Tóm Tắt Đơn Hàng</h2>
       
       <div className="space-y-6 mb-12">

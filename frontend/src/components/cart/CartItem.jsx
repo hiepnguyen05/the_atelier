@@ -34,16 +34,16 @@ const CartItem = ({ item, updateQuantity, removeFromCart, formatPrice, getProduc
 
       {/* Product Details */}
       <div className="flex-grow flex flex-col justify-between min-h-[105px] md:min-h-[145px] py-1">
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-4">
           <div>
             <Link to={`/products/${product.slug}`} className="no-underline hover:underline text-on-background">
-              <h3 className="font-headline text-xl md:text-2xl mb-1 line-clamp-1 md:line-clamp-none">{product.name}</h3>
+              <h3 className="font-headline text-lg md:text-2xl mb-1 line-clamp-2 sm:line-clamp-none">{product.name}</h3>
             </Link>
-            <p className="font-label text-[9px] md:text-xs uppercase tracking-[0.05em] text-on-surface-variant mb-4 md:mb-6">
+            <p className="font-label text-[9px] md:text-xs uppercase tracking-[0.05em] text-on-surface-variant mb-2 sm:mb-6">
               {optionLabel}
             </p>
           </div>
-          <span className="font-headline text-lg md:text-xl shrink-0">{formatPrice(itemPrice)}</span>
+          <span className="font-headline text-base sm:text-lg md:text-xl shrink-0 text-secondary sm:text-on-surface font-semibold sm:font-normal">{formatPrice(itemPrice)}</span>
         </div>
 
         {/* Quantity and Actions */}

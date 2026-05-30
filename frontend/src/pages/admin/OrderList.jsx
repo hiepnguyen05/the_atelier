@@ -27,7 +27,8 @@ const STATUS_TABS = [
   { value: 'processing', label: 'Đã xác nhận' },
   { value: 'shipped', label: 'Đang giao' },
   { value: 'completed', label: 'Hoàn thành' },
-  { value: 'cancelled', label: 'Đã hủy' }
+  { value: 'cancelled', label: 'Đã hủy' },
+  { value: 'refund_pending', label: 'Chờ hoàn tiền' }
 ];
 
 const OrderList = () => {
@@ -38,7 +39,10 @@ const OrderList = () => {
     error,
     params,
     setParams,
-    updateStatus
+    updateStatus,
+    approveRefund,
+    counts = { pending: 0, refund_pending: 0 },
+    refreshOrders
   } = useAdminOrders();
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -63,6 +67,26 @@ const OrderList = () => {
   const handleViewClick = (order) => {
     setSelectedOrder(order);
     setIsViewModalOpen(true);
+
+    // Mark order as viewed
+    try {
+      const viewedIds = JSON.parse(localStorage.getItem('admin_viewed_order_ids') || '[]');
+      if (!viewedIds.includes(order.orderId)) {
+        viewedIds.push(order.orderId);
+        // Limit storage to the most recent 1000 items
+        if (viewedIds.length > 1000) {
+          viewedIds.shift();
+        }
+        localStorage.setItem('admin_viewed_order_ids', JSON.stringify(viewedIds));
+        
+        // Trigger background recount immediately
+        if (refreshOrders) {
+          refreshOrders();
+        }
+      }
+    } catch (err) {
+      console.error('Error marking order as viewed:', err);
+    }
   };
 
   const handleConfirmUpdate = async () => {
@@ -99,17 +123,35 @@ const OrderList = () => {
         <div className="flex gap-8 min-w-max px-2">
           {STATUS_TABS.map((tab) => {
             const isActive = params.status === tab.value;
+            
+            // Determine if there is a count for this status tab
+            let countValue = 0;
+            if (tab.value === 'pending') {
+              countValue = counts.pending;
+            } else if (tab.value === 'refund_pending') {
+              countValue = counts.refund_pending;
+            }
+
             return (
               <button
                 key={tab.value}
                 onClick={() => handleTabClick(tab.value)}
-                className={`pb-4 font-label text-[11px] uppercase tracking-[0.2em] transition-all relative ${
+                className={`pb-4 font-label text-[11px] uppercase tracking-[0.2em] transition-all relative flex items-center gap-2 cursor-pointer ${
                   isActive 
                     ? 'text-primary font-bold' 
                     : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+                {countValue > 0 && (
+                  <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full transition-colors flex items-center justify-center min-w-[18px] h-[18px] ${
+                    tab.value === 'refund_pending'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-primary text-on-primary'
+                  }`}>
+                    {countValue}
+                  </span>
+                )}
                 {isActive && (
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></span>
                 )}
@@ -280,6 +322,37 @@ const OrderList = () => {
                           <p className="leading-relaxed italic text-on-surface-variant/70">Không có thông tin địa chỉ cụ thể.</p>
                         )}
                       </div>
+
+                      {/* Cancel reason */}
+                      {selectedOrder.cancelReason && (
+                        <div className="mt-4 p-4 bg-error-container/10 border border-error/10">
+                          <span className="text-error text-xs block mb-2 font-bold uppercase tracking-widest border-b border-error/10 pb-2">Lý do hủy đơn:</span>
+                          <p className="text-error leading-relaxed">{selectedOrder.cancelReason}</p>
+                        </div>
+                      )}
+
+                      {/* Refund info */}
+                      {selectedOrder.refundBankName && (
+                        <div className="mt-4 p-4 bg-amber-50 border border-amber-200">
+                          <span className="text-amber-800 text-xs block mb-2 font-bold uppercase tracking-widest border-b border-amber-200 pb-2">Thông tin hoàn tiền:</span>
+                          <div className="space-y-1 text-amber-900">
+                            <p>Ngân hàng: <strong>{selectedOrder.refundBankName}</strong></p>
+                            <p>Số tài khoản: <strong>{selectedOrder.refundAccountNumber}</strong></p>
+                            <p>Chủ tài khoản: <strong>{selectedOrder.refundAccountName}</strong></p>
+                          </div>
+                          {selectedOrder.payment?.status === 'refund_pending' && (
+                            <button
+                              onClick={async () => { await approveRefund(selectedOrder.orderId); closeModals(); }}
+                              className="mt-4 w-full bg-emerald-600 text-white py-3 font-label text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-colors"
+                            >
+                              ✓ Duyệt hoàn tiền (Đã chuyển khoản)
+                            </button>
+                          )}
+                          {selectedOrder.payment?.status === 'refunded' && (
+                            <p className="mt-3 text-emerald-700 font-bold text-xs uppercase tracking-widest">✓ Đã hoàn tiền</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </section>
                 </div>
