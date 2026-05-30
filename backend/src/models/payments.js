@@ -33,7 +33,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('pending','completed','failed','refunded'),
+      type: DataTypes.ENUM('pending','completed','failed','refunded','refund_pending'),
       allowNull: true,
       defaultValue: "pending"
     },

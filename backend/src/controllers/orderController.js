@@ -5,21 +5,24 @@ const orderService = require("../services/orderService");
  * @route   POST /api/orders
  * @access  Private
  */
-const createOrder = async (req, res) => {
+const createOrder = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const orderData = req.body;
     
-    const order = await orderService.createOrder(userId, orderData);
+    // Extract client IP for VNPay (required parameter)
+    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() 
+      || req.socket?.remoteAddress 
+      || '127.0.0.1';
+    
+    const order = await orderService.createOrder(userId, { ...orderData, ipAddress });
     
     res.status(201).json({
       message: "Order created successfully",
       order
     });
   } catch (error) {
-    console.error("Error creating order:", error);
-    const statusCode = error.message === "No order items" ? 400 : 500;
-    res.status(statusCode).json({ message: error.message || "Failed to create order" });
+    next(error);
   }
 };
 
@@ -28,14 +31,13 @@ const createOrder = async (req, res) => {
  * @route   GET /api/orders
  * @access  Private
  */
-const getUserOrders = async (req, res) => {
+const getUserOrders = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const orders = await orderService.getUserOrders(userId);
     res.status(200).json(orders);
   } catch (error) {
-    console.error("Error fetching user orders:", error);
-    res.status(500).json({ message: "Failed to fetch orders" });
+    next(error);
   }
 };
 
@@ -44,7 +46,7 @@ const getUserOrders = async (req, res) => {
  * @route   GET /api/orders/:id
  * @access  Private
  */
-const getOrderById = async (req, res) => {
+const getOrderById = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const userId = req.user.userId;
@@ -53,10 +55,7 @@ const getOrderById = async (req, res) => {
     const order = await orderService.getOrderById(orderId, userId, userRole);
     res.status(200).json(order);
   } catch (error) {
-    console.error("Error fetching order details:", error);
-    if (error.message === "Order not found") return res.status(404).json({ message: error.message });
-    if (error.message === "Not authorized to view this order") return res.status(403).json({ message: error.message });
-    res.status(500).json({ message: "Failed to fetch order details" });
+    next(error);
   }
 };
 
@@ -65,7 +64,7 @@ const getOrderById = async (req, res) => {
  * @route   PUT /api/orders/:id/status
  * @access  Private (Admin only)
  */
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const { status } = req.body;
@@ -73,10 +72,7 @@ const updateOrderStatus = async (req, res) => {
     const order = await orderService.updateOrderStatus(orderId, status);
     res.status(200).json({ message: "Order status updated", order });
   } catch (error) {
-    console.error("Error updating order status:", error);
-    if (error.message === "Invalid status") return res.status(400).json({ message: error.message });
-    if (error.message === "Order not found") return res.status(404).json({ message: error.message });
-    res.status(500).json({ message: "Failed to update order status" });
+    next(error);
   }
 };
 
@@ -85,13 +81,50 @@ const updateOrderStatus = async (req, res) => {
  * @route   GET /api/orders/admin
  * @access  Private (Admin only)
  */
-const getAllOrders = async (req, res) => {
+const getAllOrders = async (req, res, next) => {
   try {
     const result = await orderService.getAllOrders(req.query);
     res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching all orders:", error);
-    res.status(500).json({ message: "Failed to fetch orders" });
+    next(error);
+  }
+};
+
+/**
+ * @desc    Cancel user order (with optional refund info for paid orders)
+ * @route   PUT /api/orders/:id/cancel
+ * @access  Private (User only)
+ */
+const cancelOrder = async (req, res, next) => {
+  try {
+    const orderId = req.params.id;
+    const userId = req.user.userId;
+    const cancelData = {
+      cancelReason: req.body.cancelReason,
+      refundBankName: req.body.refundBankName,
+      refundAccountNumber: req.body.refundAccountNumber,
+      refundAccountName: req.body.refundAccountName
+    };
+    
+    const order = await orderService.cancelOrder(orderId, userId, cancelData);
+    res.status(200).json({ message: "Order cancelled successfully", order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Approve refund for a cancelled order (Admin action)
+ * @route   PUT /api/orders/:id/approve-refund
+ * @access  Private (Admin only)
+ */
+const approveRefund = async (req, res, next) => {
+  try {
+    const orderId = req.params.id;
+    const order = await orderService.approveRefund(orderId);
+    res.status(200).json({ message: "Refund approved successfully", order });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -100,5 +133,7 @@ module.exports = {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  getAllOrders
+  getAllOrders,
+  cancelOrder,
+  approveRefund
 };

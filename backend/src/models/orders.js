@@ -67,6 +67,26 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.ENUM('pending','processing','shipped','completed','cancelled'),
       allowNull: true,
       defaultValue: "pending"
+    },
+    cancelReason: {
+      field: 'cancel_reason',
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    refundBankName: {
+      field: 'refund_bank_name',
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    refundAccountNumber: {
+      field: 'refund_account_number',
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    refundAccountName: {
+      field: 'refund_account_name',
+      type: DataTypes.STRING(100),
+      allowNull: true
     }
   }, {
     sequelize,

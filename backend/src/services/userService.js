@@ -1,8 +1,12 @@
 const { models } = require('../config/db');
 const { Op } = require('sequelize');
+const { NotFoundError } = require('../utils/errors');
 const User = models.users;
 const Role = models.roles;
 
+/**
+ * Get all users with pagination, search, and filters
+ */
 exports.getAllUsers = async ({ page = 1, limit = 10, search = '', roleId, isActive }) => {
     const offset = (page - 1) * limit;
 
@@ -43,10 +47,13 @@ exports.getAllUsers = async ({ page = 1, limit = 10, search = '', roleId, isActi
     };
 };
 
+/**
+ * Toggle user active status
+ */
 exports.toggleUserStatus = async (id, isActive) => {
     const user = await User.findByPk(id);
     if (!user) {
-        throw new Error('USER_NOT_FOUND');
+        throw new NotFoundError('User not found');
     }
 
     user.isActive = isActive;
@@ -55,15 +62,18 @@ exports.toggleUserStatus = async (id, isActive) => {
     return user;
 };
 
+/**
+ * Update user role
+ */
 exports.updateUserRole = async (id, roleId) => {
     const user = await User.findByPk(id);
     if (!user) {
-        throw new Error('USER_NOT_FOUND');
+        throw new NotFoundError('User not found');
     }
 
     const role = await Role.findByPk(roleId);
     if (!role) {
-        throw new Error('ROLE_NOT_FOUND');
+        throw new NotFoundError('Role not found');
     }
 
     user.roleId = roleId;

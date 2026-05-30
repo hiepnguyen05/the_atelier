@@ -1,39 +1,53 @@
 const productService = require("../services/productService");
-const asyncHandler = require("../utils/asyncHandler");
+const { NotFoundError } = require("../utils/errors");
 
-const getProducts = asyncHandler(async (req, res) => {
-  const result = await productService.getProducts(req.query);
-  res.json(result);
-});
-
-const getProductBySlug = asyncHandler(async (req, res) => {
-  const product = await productService.getProductBySlug(req.params.slug);
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+const getProducts = async (req, res, next) => {
+  try {
+    const result = await productService.getProducts(req.query);
+    res.json(result);
+  } catch (error) {
+    next(error);
   }
-  res.json(product);
-});
+};
 
-const createProduct = asyncHandler(async (req, res) => {
-  const product = await productService.createProduct(req.body);
-  res.status(201).json(product);
-});
-
-const updateProduct = asyncHandler(async (req, res) => {
-  const product = await productService.updateProduct(req.params.id, req.body);
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+const getProductBySlug = async (req, res, next) => {
+  try {
+    const product = await productService.getProductBySlug(req.params.slug);
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+    res.json(product);
+  } catch (error) {
+    next(error);
   }
-  res.json(product);
-});
+};
 
-const deleteProduct = asyncHandler(async (req, res) => {
-  const success = await productService.deleteProduct(req.params.id);
-  if (!success) {
-    return res.status(404).json({ message: "Product not found" });
+const createProduct = async (req, res, next) => {
+  try {
+    const product = await productService.createProduct(req.body);
+    res.status(201).json(product);
+  } catch (error) {
+    next(error);
   }
-  res.json({ message: "Product deleted (inactivated) successfully" });
-});
+};
+
+const updateProduct = async (req, res, next) => {
+  try {
+    const product = await productService.updateProduct(req.params.id, req.body);
+    res.json(product);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteProduct = async (req, res, next) => {
+  try {
+    await productService.deleteProduct(req.params.id);
+    res.json({ message: "Product deleted (inactivated) successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getProducts,

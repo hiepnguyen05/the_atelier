@@ -27,7 +27,8 @@ const STATUS_TABS = [
   { value: 'processing', label: 'Đã xác nhận' },
   { value: 'shipped', label: 'Đang giao' },
   { value: 'completed', label: 'Hoàn thành' },
-  { value: 'cancelled', label: 'Đã hủy' }
+  { value: 'cancelled', label: 'Đã hủy' },
+  { value: 'refund_pending', label: '⏳ Chờ hoàn tiền' }
 ];
 
 const OrderList = () => {
@@ -38,7 +39,8 @@ const OrderList = () => {
     error,
     params,
     setParams,
-    updateStatus
+    updateStatus,
+    approveRefund
   } = useAdminOrders();
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -280,6 +282,37 @@ const OrderList = () => {
                           <p className="leading-relaxed italic text-on-surface-variant/70">Không có thông tin địa chỉ cụ thể.</p>
                         )}
                       </div>
+
+                      {/* Cancel reason */}
+                      {selectedOrder.cancelReason && (
+                        <div className="mt-4 p-4 bg-error-container/10 border border-error/10">
+                          <span className="text-error text-xs block mb-2 font-bold uppercase tracking-widest border-b border-error/10 pb-2">Lý do hủy đơn:</span>
+                          <p className="text-error leading-relaxed">{selectedOrder.cancelReason}</p>
+                        </div>
+                      )}
+
+                      {/* Refund info */}
+                      {selectedOrder.refundBankName && (
+                        <div className="mt-4 p-4 bg-amber-50 border border-amber-200">
+                          <span className="text-amber-800 text-xs block mb-2 font-bold uppercase tracking-widest border-b border-amber-200 pb-2">Thông tin hoàn tiền:</span>
+                          <div className="space-y-1 text-amber-900">
+                            <p>Ngân hàng: <strong>{selectedOrder.refundBankName}</strong></p>
+                            <p>Số tài khoản: <strong>{selectedOrder.refundAccountNumber}</strong></p>
+                            <p>Chủ tài khoản: <strong>{selectedOrder.refundAccountName}</strong></p>
+                          </div>
+                          {selectedOrder.payment?.status === 'refund_pending' && (
+                            <button
+                              onClick={async () => { await approveRefund(selectedOrder.orderId); closeModals(); }}
+                              className="mt-4 w-full bg-emerald-600 text-white py-3 font-label text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-colors"
+                            >
+                              ✓ Duyệt hoàn tiền (Đã chuyển khoản)
+                            </button>
+                          )}
+                          {selectedOrder.payment?.status === 'refunded' && (
+                            <p className="mt-3 text-emerald-700 font-bold text-xs uppercase tracking-widest">✓ Đã hoàn tiền</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </section>
                 </div>

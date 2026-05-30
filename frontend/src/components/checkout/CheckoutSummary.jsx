@@ -19,7 +19,7 @@ const CheckoutSummary = ({ checkoutItems, subtotal, formatPrice, handleSubmit, l
         <div className="space-y-8 mb-12 max-h-96 overflow-y-auto no-scrollbar">
           {checkoutItems.map((item) => {
             const product = item.variant?.product;
-            const imageUrl = getProductImage(product);
+            const imageUrl = item.variant?.colorImage || getProductImage(product);
             const base = Number(product?.basePrice || 0);
             const adjustment = Number(item.variant?.priceAdjustment || 0);
             const price = base + adjustment;
@@ -40,7 +40,7 @@ const CheckoutSummary = ({ checkoutItems, subtotal, formatPrice, handleSubmit, l
                   <div>
                     <h4 className="text-sm font-bold tracking-wide uppercase">{product?.name}</h4>
                     <p className="text-xs text-on-surface-variant mt-1">
-                      Màu: {item.variant?.color} / Size: {item.variant?.size}
+                      Màu: {item.variant?.colorName || 'Màu mặc định'} / Size: {item.variant?.sizeName || 'Một Kích Cỡ'}
                     </p>
                   </div>
                   <span className="text-lg serif italic">{formatPrice(price * item.quantity)}</span>

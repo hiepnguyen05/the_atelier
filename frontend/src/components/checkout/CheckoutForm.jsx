@@ -123,6 +123,48 @@ const CheckoutForm = ({ formData, handleInputChange, handlePaymentChange }) => {
             </div>
             <span className="material-symbols-outlined text-on-surface-variant">local_shipping</span>
           </label>
+
+          {/* Option 3 - MoMo E-Wallet */}
+          <label className={`group flex items-center justify-between p-6 bg-surface-container-low cursor-pointer transition-colors hover:bg-surface-container-high border-l-4 ${formData.paymentMethod === 'MOMO' ? 'border-[#ae2070]' : 'border-transparent'}`}>
+            <div className="flex items-center gap-6">
+              <input 
+                checked={formData.paymentMethod === 'MOMO'}
+                onChange={() => handlePaymentChange('MOMO')}
+                className="w-4 h-4 text-primary border-outline focus:ring-0 cursor-pointer" 
+                name="payment" 
+                type="radio"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-wide">VÍ ĐIỆN TỬ MOMO</span>
+                <span className="text-xs text-on-surface-variant">Thanh toán qua ứng dụng MoMo</span>
+              </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-8 h-8" fill="none">
+              <rect width="48" height="48" rx="12" fill="#ae2070"/>
+              <text x="24" y="30" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold" fontFamily="Arial">M</text>
+            </svg>
+          </label>
+
+          {/* Option 4 - VNPay */}
+          <label className={`group flex items-center justify-between p-6 bg-surface-container-low cursor-pointer transition-colors hover:bg-surface-container-high border-l-4 ${formData.paymentMethod === 'VNPAY' ? 'border-[#0064af]' : 'border-transparent'}`}>
+            <div className="flex items-center gap-6">
+              <input 
+                checked={formData.paymentMethod === 'VNPAY'}
+                onChange={() => handlePaymentChange('VNPAY')}
+                className="w-4 h-4 text-primary border-outline focus:ring-0 cursor-pointer" 
+                name="payment" 
+                type="radio"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-wide">CỔNG THANH TOÁN VNPAY</span>
+                <span className="text-xs text-on-surface-variant">ATM / Visa / MasterCard / QR Pay</span>
+              </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-8 h-8" fill="none">
+              <rect width="48" height="48" rx="12" fill="#0064af"/>
+              <text x="24" y="30" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial">VN</text>
+            </svg>
+          </label>
         </div>
       </section>
     </div>

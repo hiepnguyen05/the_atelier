@@ -5,7 +5,9 @@ const {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  getAllOrders
+  getAllOrders,
+  cancelOrder,
+  approveRefund
 } = require("../controllers/orderController");
 const { protect, authorize } = require("../middlewares/authMiddleware");
 
@@ -19,6 +21,12 @@ router.get("/", getUserOrders);
 router.get("/admin", authorize("admin"), getAllOrders);
 
 router.get("/:id", getOrderById);
+
+// User cancel order
+router.put("/:id/cancel", cancelOrder);
+
+// Admin: approve refund
+router.put("/:id/approve-refund", authorize("admin"), approveRefund);
 
 // Update status requires admin privileges
 router.put("/:id/status", authorize("admin"), updateOrderStatus);

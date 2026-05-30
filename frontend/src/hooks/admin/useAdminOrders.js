@@ -75,6 +75,19 @@ export const useAdminOrders = () => {
     }
   };
 
+  const approveRefund = async (orderId) => {
+    try {
+      await orderService.approveRefund(orderId);
+      showToast('Đã duyệt hoàn tiền thành công', 'success');
+      await fetchOrders();
+      return true;
+    } catch (err) {
+      console.error('Error approving refund:', err);
+      showToast(err.response?.data?.message || 'Không thể duyệt hoàn tiền', 'error');
+      return false;
+    }
+  };
+
   return {
     orders,
     pagination,
@@ -83,6 +96,7 @@ export const useAdminOrders = () => {
     params,
     setParams,
     updateStatus,
+    approveRefund,
     refreshOrders: fetchOrders
   };
 };

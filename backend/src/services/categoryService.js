@@ -1,9 +1,10 @@
 const { models } = require("../config/db");
 const { generateSlug } = require("../utils/slugifyUtils");
 const Sequelize = require("sequelize");
+const { NotFoundError, BadRequestError } = require("../utils/errors");
 
 /**
- * Lấy tất cả danh mục (hỗ trợ filter theo parentId)
+ * Get all categories (supports filtering by parentId)
  */
 const getAllCategories = async (parentId) => {
   const where = parentId ? { parentId } : {};
@@ -32,7 +33,7 @@ const getAllCategories = async (parentId) => {
 };
 
 /**
- * Lấy danh mục theo ID
+ * Get category by ID
  */
 const getCategoryById = async (id) => {
   return await models.categories.findByPk(id, {
@@ -46,20 +47,20 @@ const getCategoryById = async (id) => {
 };
 
 /**
- * Tạo danh mục mới
+ * Create a new category
  */
 const createCategory = async (data) => {
-  // Kiểm tra danh mục cha nếu có
+  // Check parent category if provided
   let parentSlug = "";
   if (data.parentId) {
     const parent = await models.categories.findByPk(data.parentId);
     if (!parent) {
-      throw new Error("Parent category not found");
+      throw new NotFoundError("Parent category not found");
     }
     parentSlug = parent.slug;
   }
 
-  // Kiểm tra trùng tên trong cùng cấp (bao gồm bản ghi đã xóa mềm)
+  // Check for duplicates in the same level (including soft-deleted ones)
   const existingCategory = await models.categories.findOne({
     where: {
       name: data.name,
@@ -70,18 +71,18 @@ const createCategory = async (data) => {
 
   if (existingCategory) {
     if (!existingCategory.deletedAt) {
-      throw new Error("Danh mục này đã tồn tại trong cùng cấp");
+      throw new BadRequestError("Danh mục này đã tồn tại trong cùng cấp");
     } else {
       await existingCategory.destroy({ force: true });
     }
   }
 
-  // Tự động tạo slug
+  // Auto-generate slug
   if (!data.slug || data.slug.trim() === "") {
     data.slug = generateSlug(data.name, parentSlug);
   }
 
-  // Kiểm tra trùng slug
+  // Check for duplicate slugs
   const existingSlug = await models.categories.findOne({
     where: { slug: data.slug },
     paranoid: false,
@@ -94,7 +95,7 @@ const createCategory = async (data) => {
 };
 
 /**
- * Cập nhật danh mục
+ * Update category
  */
 const updateCategory = async (id, data) => {
   const category = await models.categories.findByPk(id);
@@ -108,19 +109,19 @@ const updateCategory = async (id, data) => {
 };
 
 /**
- * Xóa danh mục (soft delete)
+ * Soft delete category
  */
 const deleteCategory = async (id) => {
   const category = await models.categories.findByPk(id);
   if (!category) return false;
 
-  // Kiểm tra danh mục con
+  // Check for sub-categories
   const subCategoriesCount = await models.categories.count({ where: { parentId: id } });
   if (subCategoriesCount > 0) {
-    throw new Error("Cannot delete category with sub-categories");
+    throw new BadRequestError("Cannot delete category with sub-categories");
   }
 
-  // Cập nhật slug/name để tránh trùng lặp khi tạo mới
+  // Update slug/name to avoid conflicts upon recreation
   await category.update({
     slug: `${category.slug}-deleted-${Date.now()}`,
     name: `${category.name} (Deleted-${Date.now()})`,
@@ -131,7 +132,7 @@ const deleteCategory = async (id) => {
 };
 
 /**
- * Lấy danh mục theo slug
+ * Get category by slug
  */
 const getCategoryBySlug = async (slug) => {
   return await models.categories.findOne({

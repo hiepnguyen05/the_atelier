@@ -1,7 +1,8 @@
 const { models, sequelize } = require("../config/db");
+const { NotFoundError } = require("../utils/errors");
 
 /**
- * Lấy giỏ hàng của user (nếu chưa có thì tạo mới)
+ * Get user cart (create if not exists)
  */
 const getCart = async (userId) => {
   let cart = await models.cart.findOne({
@@ -32,40 +33,40 @@ const getCart = async (userId) => {
 
   if (!cart) {
     cart = await models.cart.create({ userId });
-    cart.cartItems = []; // Trả về dạng mảng rỗng để frontend dễ xử lý
+    cart.cartItems = []; // Return empty array for frontend convenience
   }
 
   return cart;
 };
 
 /**
- * Thêm sản phẩm vào giỏ hàng
+ * Add an item to cart
  */
 const addItemToCart = async (userId, variantId, quantity) => {
-  // Lấy hoặc tạo giỏ hàng
+  // Get or create cart
   let cart = await models.cart.findOne({ where: { userId } });
   if (!cart) {
     cart = await models.cart.create({ userId });
   }
 
-  // Kiểm tra variant có tồn tại không
+  // Check if variant exists
   const variant = await models.product_variants.findByPk(variantId);
   if (!variant) {
-    throw new Error("Variant not found");
+    throw new NotFoundError("Variant not found");
   }
 
-  // Kiểm tra xem item đã có trong giỏ chưa
+  // Check if item already exists in cart
   const existingItem = await models.cart_items.findOne({
     where: { cartId: cart.cartId, variantId },
   });
 
   if (existingItem) {
-    // Nếu có rồi thì tăng số lượng
+    // If exists, increase quantity
     await existingItem.update({
       quantity: existingItem.quantity + quantity,
     });
   } else {
-    // Nếu chưa có thì tạo mới
+    // If not, create new cart item
     await models.cart_items.create({
       cartId: cart.cartId,
       variantId,
@@ -77,12 +78,12 @@ const addItemToCart = async (userId, variantId, quantity) => {
 };
 
 /**
- * Cập nhật số lượng sản phẩm trong giỏ
+ * Update item quantity in cart
  */
 const updateItemQuantity = async (userId, cartItemId, quantity) => {
   const cart = await models.cart.findOne({ where: { userId } });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new NotFoundError("Cart not found");
   }
 
   const cartItem = await models.cart_items.findOne({
@@ -90,7 +91,7 @@ const updateItemQuantity = async (userId, cartItemId, quantity) => {
   });
 
   if (!cartItem) {
-    throw new Error("Item not found in cart");
+    throw new NotFoundError("Item not found in cart");
   }
 
   await cartItem.update({ quantity });
@@ -99,12 +100,12 @@ const updateItemQuantity = async (userId, cartItemId, quantity) => {
 };
 
 /**
- * Xóa một sản phẩm khỏi giỏ hàng
+ * Remove an item from cart
  */
 const removeItemFromCart = async (userId, cartItemId) => {
   const cart = await models.cart.findOne({ where: { userId } });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new NotFoundError("Cart not found");
   }
 
   const cartItem = await models.cart_items.findOne({
@@ -112,27 +113,28 @@ const removeItemFromCart = async (userId, cartItemId) => {
   });
 
   if (!cartItem) {
-    throw new Error("Item not found in cart");
+    throw new NotFoundError("Item not found in cart");
   }
 
-  // Xóa cứng (force: true) hoặc xóa mềm (tùy vào logic hệ thống, nhưng giỏ hàng thường xóa luôn)
+  // Hard delete cart item
   await cartItem.destroy({ force: true });
 
   return await getCart(userId);
 };
 
 /**
- * Xóa toàn bộ giỏ hàng
+ * Clear the entire cart
  */
 const clearCart = async (userId) => {
   const cart = await models.cart.findOne({ where: { userId } });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new NotFoundError("Cart not found");
   }
 
+  // Hard delete all items in cart
   await models.cart_items.destroy({
     where: { cartId: cart.cartId },
-    force: true, // Xóa cứng các item
+    force: true,
   });
 
   return await getCart(userId);

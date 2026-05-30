@@ -1,54 +1,74 @@
 const categoryService = require("../services/categoryService");
-const asyncHandler = require("../utils/asyncHandler");
+const { NotFoundError } = require("../utils/errors");
 
-const getAllCategories = asyncHandler(async (req, res) => {
-  const { parentId } = req.query;
-  const categories = await categoryService.getAllCategories(parentId);
-  res.json(categories);
-});
-
-// Hàm thông minh xử lý cả ID và Slug
-const getCategory = asyncHandler(async (req, res) => {
-  const { identifier } = req.params;
-  let category;
-
-  // Nếu identifier là số, thử tìm theo ID trước
-  if (!isNaN(identifier)) {
-    category = await categoryService.getCategoryById(identifier);
+const getAllCategories = async (req, res, next) => {
+  try {
+    const { parentId } = req.query;
+    const categories = await categoryService.getAllCategories(parentId);
+    res.json(categories);
+  } catch (error) {
+    next(error);
   }
+};
 
-  // Nếu không tìm thấy bằng ID (hoặc không phải số), tìm theo Slug
-  if (!category) {
-    category = await categoryService.getCategoryBySlug(identifier);
+// Smart handler for both ID and Slug
+const getCategory = async (req, res, next) => {
+  try {
+    const { identifier } = req.params;
+    let category;
+
+    // If identifier is a number, try ID first
+    if (!isNaN(identifier)) {
+      category = await categoryService.getCategoryById(identifier);
+    }
+
+    // If not found by ID (or not a number), try Slug
+    if (!category) {
+      category = await categoryService.getCategoryBySlug(identifier);
+    }
+
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
+
+    res.json(category);
+  } catch (error) {
+    next(error);
   }
+};
 
-  if (!category) {
-    return res.status(404).json({ message: "Category not found" });
+const createCategory = async (req, res, next) => {
+  try {
+    const category = await categoryService.createCategory(req.body);
+    res.status(201).json(category);
+  } catch (error) {
+    next(error);
   }
+};
 
-  res.json(category);
-});
-
-const createCategory = asyncHandler(async (req, res) => {
-  const category = await categoryService.createCategory(req.body);
-  res.status(201).json(category);
-});
-
-const updateCategory = asyncHandler(async (req, res) => {
-  const category = await categoryService.updateCategory(req.params.id, req.body);
-  if (!category) {
-    return res.status(404).json({ message: "Category not found" });
+const updateCategory = async (req, res, next) => {
+  try {
+    const category = await categoryService.updateCategory(req.params.id, req.body);
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
+    res.json(category);
+  } catch (error) {
+    next(error);
   }
-  res.json(category);
-});
+};
 
-const deleteCategory = asyncHandler(async (req, res) => {
-  const success = await categoryService.deleteCategory(req.params.id);
-  if (!success) {
-    return res.status(404).json({ message: "Category not found" });
+const deleteCategory = async (req, res, next) => {
+  try {
+    const success = await categoryService.deleteCategory(req.params.id);
+    if (!success) {
+      throw new NotFoundError("Category not found");
+    }
+    res.json({ message: "Category deleted successfully" });
+  } catch (error) {
+    next(error);
   }
-  res.json({ message: "Category deleted successfully" });
-});
+};
 
 module.exports = {
   getAllCategories,

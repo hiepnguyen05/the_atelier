@@ -59,8 +59,20 @@ export const useCheckout = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.recipientName || !formData.phoneNumber || !formData.addressLine || !formData.city) {
+    if (!formData.recipientName || !formData.phoneNumber || !formData.addressLine || !formData.city || !formData.email) {
       showToast('Vui lòng điền đầy đủ thông tin giao hàng', 'error');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      showToast('Email không hợp lệ. Vui lòng kiểm tra lại.', 'error');
+      return;
+    }
+
+    const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (!phoneRegex.test(formData.phoneNumber.replace(/\s+/g, ''))) {
+      showToast('Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam.', 'error');
       return;
     }
 
@@ -83,13 +95,27 @@ export const useCheckout = () => {
       };
 
       const res = await orderService.createOrder(payload);
+
+      const order = res.data.order;
+
+      // If MoMo or VNPay payment, redirect to the respective payment gateway URL
+      // Cart will be cleared after successful verification on the return page
+      if ((formData.paymentMethod === 'MOMO' || formData.paymentMethod === 'VNPAY') && order.payUrl) {
+        window.location.href = order.payUrl;
+        return;
+      }
+
+      // For COD: refresh cart (items were already cleared on the backend)
       if (fetchCart) {
         await fetchCart();
       }
-      navigate('/checkout/success', { state: { order: res.data.order } });
+
+      // For COD and other methods, navigate to internal success page
+      navigate('/checkout/success', { state: { order } });
     } catch (error) {
       console.error(error);
-      showToast('Đã có lỗi xảy ra. Vui lòng thử lại.', 'error');
+      const errorMsg = error.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
